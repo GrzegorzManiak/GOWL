@@ -17,9 +17,7 @@ func GenerateZKP(
 	X []byte,
 	userID string,
 ) *SchnorrZKP {
-	curveParams := generator.Params()
-	g := elliptic.MarshalCompressed(generator, curveParams.Gx, curveParams.Gy)
-	return GenerateZKPGProvided(generator, &g, n, x, X, userID)
+	return GenerateZKPGProvided(generator, GetG(generator), n, x, X, userID)
 }
 
 func GenerateZKPGProvided(
@@ -36,4 +34,22 @@ func GenerateZKPGProvided(
 	r := new(big.Int).Sub(v, new(big.Int).Mul(x, h))
 	r = ModuloN(r, n)
 	return &SchnorrZKP{V, r}
+}
+
+func GetG(curve elliptic.Curve) *[]byte {
+	curveParams := curve.Params()
+	g := elliptic.MarshalCompressed(curve, curveParams.Gx, curveParams.Gy)
+	return &g
+}
+
+func (zkp SchnorrZKP) VerifyZKP(
+	generator elliptic.Curve,
+	X []byte,
+	userID string,
+) bool {
+	//G := GetG(generator)
+	//h := Hash(*G, zkp.V, X, userID)
+	//x, y := elliptic.Unmarshal(generator, X)
+	//vx, vy := elliptic.Unmarshal(generator, zkp.V)
+	return false
 }

@@ -18,10 +18,10 @@ type Client struct {
 	T []byte   // T_ = t * G
 
 	// -- Authentication Init -- //
-	x1 *big.Int    // x1 ∈R [0, q − 1], X1 = gx1
+	x1 *big.Int    // x1 ∈R [0, q − 1]
 	X1 []byte      // X1 = x1 * G
 	Π1 *SchnorrZKP // Π1 = ZKP{x1}
-	x2 *big.Int    // x2 ∈R [1, q − 1], X2 = gx2
+	x2 *big.Int    // x2 ∈R [1, q − 1]
 	X2 []byte      // X2 = x2 * G
 	Π2 *SchnorrZKP // Π2 = ZKP{x2}
 	G  *[]byte     // G = g
@@ -51,7 +51,7 @@ func (c *Client) Register() (t *big.Int, pi *big.Int, T []byte) {
 	return c.t, c.π, c.T
 }
 
-func (c *Client) AuthInit() (x1 *big.Int, Π1 *SchnorrZKP, x2 *big.Int, Π2 *SchnorrZKP) {
+func (c *Client) AuthInit() (x1 []byte, Π1 *SchnorrZKP, x2 []byte, Π2 *SchnorrZKP) {
 	c.x1 = GenerateKey(c.CurveParams.N)
 	c.X1 = MultiplyG(c.Curve, c.x1)
 	c.Π1 = GenerateZKPGProvided(c.Curve, c.G, c.CurveParams.N, c.x1, c.X1, c.UserIdentifier)
@@ -60,5 +60,5 @@ func (c *Client) AuthInit() (x1 *big.Int, Π1 *SchnorrZKP, x2 *big.Int, Π2 *Sch
 	c.X2 = MultiplyG(c.Curve, c.x2)
 	c.Π2 = GenerateZKPGProvided(c.Curve, c.G, c.CurveParams.N, c.x2, c.X2, c.UserIdentifier)
 
-	return c.x1, c.Π1, c.x2, c.Π2
+	return c.X1, c.Π1, c.X2, c.Π2
 }
