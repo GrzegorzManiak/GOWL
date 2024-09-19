@@ -24,7 +24,7 @@ func HighEntropyRandom(min *big.Int, max *big.Int) *big.Int {
 	return randomBigInt
 }
 
-func Generatex3(n *big.Int) *big.Int {
+func GenerateKey(n *big.Int) *big.Int {
 	return HighEntropyRandom(big.NewInt(1), new(big.Int).Sub(n, big.NewInt(1)))
 }
 

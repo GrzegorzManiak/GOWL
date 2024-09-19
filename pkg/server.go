@@ -12,7 +12,7 @@ type Server struct {
 
 	x3 *big.Int
 	X3 []byte
-	Π4 SchnorrZKP
+	Π4 *SchnorrZKP
 }
 
 func ServerInit(name string, curve elliptic.Curve) *Server {
@@ -24,8 +24,8 @@ func ServerInit(name string, curve elliptic.Curve) *Server {
 }
 
 // user string, PI *big.Int, T []byte
-func (s *Server) RegisterUser() ([]byte, SchnorrZKP) {
-	s.x3 = Generatex3(s.CurveParams.N)
+func (s *Server) RegisterUser() ([]byte, *SchnorrZKP) {
+	s.x3 = GenerateKey(s.CurveParams.N)
 	s.X3 = MultiplyG(s.Curve, s.x3)
 	s.Π4 = GenerateZKP(s.Curve, s.CurveParams.N, s.x3, s.X3, s.ServerName)
 	return s.X3, s.Π4
