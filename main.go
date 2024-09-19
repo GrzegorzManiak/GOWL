@@ -16,11 +16,9 @@ func main() {
 	// -- Registration CLIENT -- //
 	//
 	curve := elliptic.P256()
-	curveParams := curve.Params()
 
-	t := pkg.ModuloN(pkg.Hash(user, pass), curveParams.N)
-	pi := pkg.ModuloN(pkg.Hash(t), curveParams.N)
-	T := pkg.MultiplyG(curve, t)
+	client := pkg.ClientInit(user, pass, serverName, curve)
+	t, pi, T := client.Register()
 
 	fmt.Println("t:", t.String())
 	fmt.Println("pi:", pi.String())
@@ -29,11 +27,11 @@ func main() {
 	//
 	// -- Registration SERVER -- //
 	//
-	x3 := pkg.Generatex3(curveParams.N)
-	X3 := pkg.MultiplyG(curve, x3)
-	zkpX4 := pkg.GenerateZKP(curve, curveParams.N, x3, X3, serverName)
+	server := pkg.ServerInit(serverName, curve)
+	X3, zkpX4 := server.RegisterUser()
 
-	fmt.Println("x3:", x3.String())
+	// Store: X3, zkpX4, user, pi, T
+
 	fmt.Println("X3:", new(big.Int).SetBytes(X3).String())
 	fmt.Println("V:", new(big.Int).SetBytes(zkpX4.V).String())
 	fmt.Println("r:", new(big.Int).SetBytes(zkpX4.R.Bytes()).String())

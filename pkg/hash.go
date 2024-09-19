@@ -35,7 +35,7 @@ func Hash(args ...interface{}) *big.Int {
 			i := v.Bytes()
 			// I had the painfull joy of figuring out that in java, when
 			// why convert a big int into a byte array, the first byte is
-			// a sign byte.
+			// a sign byte. Adleast that's my guess.
 			if i[0] >= 128 {
 				i = append([]byte{0}, i...)
 			} else {
