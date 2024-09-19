@@ -4,6 +4,7 @@ import (
 	"crypto/ecdh"
 	"crypto/sha256"
 	"math/big"
+	"reflect"
 )
 
 func IntTo4Bytes(i int) []byte {
@@ -20,6 +21,10 @@ func Hash(args ...interface{}) *big.Int {
 			encoded := v.Bytes()
 			sha256Output.Write(IntTo4Bytes(len(encoded)))
 			sha256Output.Write(encoded)
+
+		case []byte:
+			sha256Output.Write(IntTo4Bytes(len(v)))
+			sha256Output.Write(v)
 
 		case string:
 			bytes := []byte(v)
@@ -40,15 +45,15 @@ func Hash(args ...interface{}) *big.Int {
 			sha256Output.Write(i)
 
 		case SchnorrZKP:
-			vEncoded := v.V.Bytes()
-			rBytes := v.r.Bytes()
+			vEncoded := v.V
+			rBytes := v.R.Bytes()
 			sha256Output.Write(IntTo4Bytes(len(vEncoded)))
 			sha256Output.Write(vEncoded)
 			sha256Output.Write(IntTo4Bytes(len(rBytes)))
 			sha256Output.Write(rBytes)
 
 		default:
-			panic("Invalid type passed to Hash")
+			panic("Invalid type passed to Hash" + reflect.TypeOf(v).String())
 		}
 	}
 

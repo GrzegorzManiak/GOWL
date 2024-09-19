@@ -1,16 +1,9 @@
 package pkg
 
 import (
-	"crypto/ecdh"
+	"crypto/elliptic"
 	"crypto/rand"
 	"math/big"
-)
-
-// -- Curves that the user can use
-var (
-	P256 = ecdh.P256
-	P384 = ecdh.P384
-	P521 = ecdh.P521
 )
 
 func ModuloN(x *big.Int, n *big.Int) *big.Int {
@@ -29,4 +22,14 @@ func HighEntropyRandom(min *big.Int, max *big.Int) *big.Int {
 	}
 	randomBigInt.Add(randomBigInt, min)
 	return randomBigInt
+}
+
+func Generatex3(n *big.Int) *big.Int {
+	return HighEntropyRandom(big.NewInt(1), new(big.Int).Sub(n, big.NewInt(1)))
+}
+
+func MultiplyG(curve elliptic.Curve, x *big.Int) []byte {
+	curveParams := curve.Params()
+	tx, ty := curve.ScalarMult(curveParams.Gx, curveParams.Gy, x.Bytes())
+	return elliptic.MarshalCompressed(curve, tx, ty)
 }

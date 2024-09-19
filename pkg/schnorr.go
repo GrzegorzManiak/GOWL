@@ -1,25 +1,23 @@
 package pkg
 
 import (
-	"crypto/ecdh"
+	"crypto/elliptic"
 	"math/big"
 )
 
 type SchnorrZKP struct {
-	V *ecdh.PublicKey
-	r *big.Int
+	V []byte
+	R *big.Int
 }
 
-/*
-private void generateZKP (ECPoint generator, BigInteger n, BigInteger x, ECPoint X, String userID) {
-
-Generate a random v from [1, n-1], and compute V = G*v
-BigInteger v = org.bouncycastle.util.BigIntegers.createRandomInRange(BigInteger.ONE,
-n.subtract(BigInteger.ONE), new SecureRandom());
-V = generator.multiply(v);
-
-BigInteger h = getSHA256(generator, V, X, userID); // h
-
-r = v.subtract(x.multiply(h)).mod(n); // r = v-x*h mod n
+func GenerateZKP(generator elliptic.Curve, n *big.Int, x *big.Int, X []byte, userID string) SchnorrZKP {
+	v := Generatex3(n)
+	V := MultiplyG(generator, v)
+	curveParams := generator.Params()
+	// TODO: Move g out of this function as to not generate it every time
+	g := elliptic.MarshalCompressed(generator, curveParams.Gx, curveParams.Gy)
+	h := Hash(g, V, X, userID)
+	r := new(big.Int).Sub(v, new(big.Int).Mul(x, h))
+	r = ModuloN(r, n)
+	return SchnorrZKP{V, r}
 }
-*/
