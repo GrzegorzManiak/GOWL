@@ -79,7 +79,7 @@ func (c *Client) AuthValidate(
 	Π3 *SchnorrZKP,
 	Π4 *SchnorrZKP,
 	Πβ *SchnorrZKP,
-) (*[]byte, *SchnorrZKP, *big.Int) {
+) (*big.Int, *[]byte, *SchnorrZKP, *big.Int, *big.Int) {
 
 	G := GetG(c.Curve)
 	if VerifyZKP(c.Curve, *G, X3, *Π3, c.ServerName) == false {
@@ -139,17 +139,11 @@ func (c *Client) AuthValidate(
 		X3, X4,
 	)
 
-	println("RawServerKey:", new(big.Int).SetBytes(rawClientKey).String())
-	println("clientSessionKey:", c.ClientSessionKey.String())
-	println("clientKCKey:", c.ClientKCKey.String())
-	println("clientKCTag:", clientKCTag.String())
-	println("Client hTranscript:", hTranscript.String())
-	println("rValue:", rValue.String())
-
-	return c.α, c.Πα, c.r
+	return clientKCTag, c.α, c.Πα, c.r, c.ClientSessionKey
 }
 
 func (c *Client) VerifyResponse(
+	serverKCTag *big.Int,
 	X3 []byte,
 	X4 []byte,
 ) {
@@ -162,5 +156,7 @@ func (c *Client) VerifyResponse(
 		c.X1, c.X2,
 	)
 
-	println("Server KCTag2:", serverKCTag2.String())
+	if serverKCTag.Cmp(serverKCTag2) != 0 {
+		panic("ERROR: invalid r (server authentication failed).")
+	}
 }

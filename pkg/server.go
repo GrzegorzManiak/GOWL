@@ -73,6 +73,7 @@ func (s *Server) AuthInit(
 }
 
 func (s *Server) AuthValidate(
+	clientKCTag *big.Int,
 	π *big.Int,
 	T []byte,
 	user string,
@@ -82,7 +83,7 @@ func (s *Server) AuthValidate(
 	Π2 *SchnorrZKP,
 	α *[]byte,
 	Πα *SchnorrZKP,
-	r *big.Int) {
+	r *big.Int) (*big.Int, *big.Int) {
 
 	//Gα := Add(s.Curve, Add(s.Curve, X1, s.X3), s.X4)
 	//if VerifyZKP(s.Curve, Gα, *α, *Πα, user) == false {
@@ -120,6 +121,10 @@ func (s *Server) AuthValidate(
 		s.X3, s.X4,
 	)
 
+	if clientKCTag.Cmp(clientKCTag2) != 0 {
+		panic("ERROR: invalid r (client authentication failed).")
+	}
+
 	serverKCTag := DeriveHMACTag(
 		serverKCKey,
 		"KC_1_V",
@@ -129,13 +134,6 @@ func (s *Server) AuthValidate(
 		X1, X2,
 	)
 
-	//if (G.multiply(rValue).add(T.multiply(hServer.mod(n))).equals(X1)) {
-	//	System.out.println("Server checks rValue (for client authentication): OK");
-	//}else {
-	//	System.out.println("ERROR: invalid r (client authentication failed).");
-	//	System.exit(0);
-	//}
-
 	GxRv := MultiplyX(s.Curve, GetG(s.Curve), r)
 	hServerModN := ModuloN(hServer, s.CurveParams.N)
 	TxH := MultiplyX(s.Curve, &T, hServerModN)
@@ -144,10 +142,5 @@ func (s *Server) AuthValidate(
 		panic("ERROR: invalid r (client authentication failed).")
 	}
 
-	println("RawServerKey:", new(big.Int).SetBytes(rawServerKey).String())
-	println("serverSessionKey:", serverSessionKey.String())
-	println("serverKCKey:", serverKCKey.String())
-	println("Server hTranscript:", hServer.String())
-	println("Server KCTag:", serverKCTag.String())
-	println("Client KCTag:", clientKCTag2.String())
+	return serverKCTag, serverSessionKey
 }
