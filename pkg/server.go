@@ -43,7 +43,7 @@ func (s *Server) AuthInit(
 	π *big.Int,
 	X1 []byte,
 	X2 []byte,
-	Π1 *SchnorrZKP,
+	Π1 *SchnorrZKP, // TODO: Implement ZKP Verification
 	Π2 *SchnorrZKP,
 ) ([]byte, []byte, []byte, *SchnorrZKP, *SchnorrZKP, *SchnorrZKP) {
 	s.x4 = GenerateKey(s.CurveParams.N)
@@ -60,23 +60,3 @@ func (s *Server) AuthInit(
 
 	return s.X3, s.X4, s.β, s.Π3, s.Π4, s.Πβ
 }
-
-//
-//Gβ := Add(s.Curve, X1, s.X3)
-//Gβ = Add(s.Curve, Gβ, s.X4)
-//
-//x2π := new(big.Int).SetBytes(X2)
-//x2π = new(big.Int).Mul(x2π, s.CurveParams.N)
-//β = MultiplyX(s.Curve, &Gβ, x2π)
-//
-//println("Gβ: ", new(big.Int).SetBytes(Gβ).String())
-//println("β: ", new(big.Int).SetBytes(β).String())
-//
-//zkpX2s := GenerateZKP(s.Curve, s.CurveParams.N, x2π, β, user)
-//rawClientKey := ComputeRawClientKey(s.Curve, β, s.X4, x2π, π, s.CurveParams.N)
-//
-//println("Raw Client Key: ", new(big.Int).SetBytes(rawClientKey).String())
-//println("zkpX2s.V: ", new(big.Int).SetBytes(zkpX2s.V).String())
-//println("zkpX2s.R: ", new(big.Int).SetBytes(zkpX2s.R.Bytes()).String())
-//
-//return nil, nil, nil, nil, nil, nil, nil

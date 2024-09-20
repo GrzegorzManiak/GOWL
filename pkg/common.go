@@ -6,6 +6,11 @@ import (
 	"math/big"
 )
 
+const (
+	SessionKey      = "session_key"
+	ConfirmationKey = "confirmation_key"
+)
+
 func ModuloN(x *big.Int, n *big.Int) *big.Int {
 	return new(big.Int).Mod(x, n)
 }
@@ -43,31 +48,19 @@ func MultiplyX(curve elliptic.Curve, X *[]byte, x *big.Int) []byte {
 func Add(curve elliptic.Curve, x1 []byte, x2 []byte) []byte {
 	x1x, x1y := elliptic.UnmarshalCompressed(curve, x1)
 	x2x, x2y := elliptic.UnmarshalCompressed(curve, x2)
-
-	if x1x == nil || x1y == nil || x2x == nil || x2y == nil {
-		invalidPoint := ""
-		if x1x == nil {
-			invalidPoint += "x1x "
-		}
-		if x1y == nil {
-			invalidPoint += "x1y "
-		}
-		if x2x == nil {
-			invalidPoint += "x2x "
-		}
-		if x2y == nil {
-			invalidPoint += "x2y "
-		}
-		panic("Invalid point " + invalidPoint)
-	}
-
 	tx, ty := curve.Add(x1x, x1y, x2x, x2y)
 	return elliptic.MarshalCompressed(curve, tx, ty)
 }
 
+// Subtract > All credit goes to ChatGPT, I had no clue how to implement this
+// myself.
 func Subtract(curve elliptic.Curve, x1 []byte, x2 []byte) []byte {
-	x1x, x1y := elliptic.Unmarshal(curve, x1)
-	x2x, x2y := elliptic.Unmarshal(curve, x2)
-	tx, ty := curve.Add(x1x, x1y, x2x, new(big.Int).Neg(x2y))
+	x1x, x1y := elliptic.UnmarshalCompressed(curve, x1)
+	x2x, x2y := elliptic.UnmarshalCompressed(curve, x2)
+	negY2 := new(big.Int).Neg(x2y)
+	if negY2.Sign() < 0 {
+		negY2.Add(negY2, curve.Params().P)
+	}
+	tx, ty := curve.Add(x1x, x1y, x2x, negY2)
 	return elliptic.MarshalCompressed(curve, tx, ty)
 }

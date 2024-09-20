@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"crypto/ecdh"
+	"crypto/hmac"
 	"crypto/sha256"
 	"math/big"
 	"reflect"
@@ -44,7 +45,7 @@ func Hash(args ...interface{}) *big.Int {
 			sha256Output.Write(IntTo4Bytes(len(i)))
 			sha256Output.Write(i)
 
-		case SchnorrZKP:
+		case *SchnorrZKP:
 			vEncoded := v.V
 			rBytes := v.R.Bytes()
 			sha256Output.Write(IntTo4Bytes(len(vEncoded)))
@@ -53,10 +54,37 @@ func Hash(args ...interface{}) *big.Int {
 			sha256Output.Write(rBytes)
 
 		default:
-			panic("Invalid type passed to Hash" + reflect.TypeOf(v).String())
+			panic("Invalid type passed to Hash: " + reflect.TypeOf(v).String())
 		}
 	}
 
 	hash := sha256Output.Sum(nil)
 	return new(big.Int).SetBytes(hash[:])
+}
+
+func DeriveHMACTag(
+	key *big.Int,
+	messageString string,
+	senderID string,
+	receiverID string,
+	senderKey1 []byte,
+	senderKey2 []byte,
+	receiverKey1 []byte,
+	receiverKey2 []byte,
+) *big.Int {
+	keyBytes := key.Bytes()
+	mac := hmac.New(sha256.New, keyBytes)
+
+	mac.Write([]byte(messageString))
+	mac.Write([]byte(senderID))
+	mac.Write([]byte(receiverID))
+	mac.Write(senderKey1)
+	mac.Write(senderKey2)
+	mac.Write(receiverKey1)
+	mac.Write(receiverKey2)
+
+	hmacSum := mac.Sum(nil)
+	hmacBigInt := new(big.Int).SetBytes(hmacSum)
+
+	return hmacBigInt
 }
