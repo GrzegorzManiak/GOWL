@@ -90,10 +90,10 @@ func (c *Client) AuthValidate(
 		panic("ZKP Verification Failed for Π4")
 	}
 
-	//Gβ := Add(c.Curve, Add(c.Curve, c.X1, c.X2), X3)
-	//if VerifyZKP(c.Curve, Gβ, β, *Πβ, c.ServerName) == false {
-	//	panic("ZKP Verification Failed for Πβ")
-	//}
+	Gβ := Add(c.Curve, Add(c.Curve, c.X1, c.X2), X3)
+	if VerifyZKP(c.Curve, Gβ, β, *Πβ, c.ServerName) == false {
+		panic("ZKP Verification Failed for Πβ")
+	}
 
 	Gα := Add(c.Curve, c.X1, X3)
 	Gα = Add(c.Curve, Gα, X4)

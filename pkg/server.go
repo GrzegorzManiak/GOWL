@@ -67,7 +67,14 @@ func (s *Server) AuthInit(
 	Gβ := Add(s.Curve, Add(s.Curve, X1, X2), s.X3)
 	x4Pi := ModuloN(Multiply(s.x4, π), s.CurveParams.N)
 	s.β = MultiplyX(s.Curve, &Gβ, x4Pi)
-	s.Πβ = GenerateZKPGProvided(s.Curve, &Gβ, s.CurveParams.N, x4Pi, s.β, s.ServerName)
+	s.Πβ = GenerateZKPGProvided(
+		s.Curve,
+		&Gβ,
+		s.CurveParams.N,
+		x4Pi,
+		s.β,
+		s.ServerName,
+	)
 
 	return s.X3, s.X4, s.β, s.Π3, s.Π4, s.Πβ
 }

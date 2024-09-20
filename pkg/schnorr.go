@@ -28,10 +28,12 @@ func GenerateZKPGProvided(
 	X []byte,
 	userID string,
 ) *SchnorrZKP {
-	v := GenerateKey(n)
+	//v := GenerateKey(n)
+	v, _ := new(big.Int).SetString("305027369702916771285353512566489202667490348064085757562196090488234633831774", 10)
 	V := MultiplyX(generator, g, v)
 	h := Hash(*g, V, X, userID)
-	r := new(big.Int).Sub(v, new(big.Int).Mul(x, h))
+	r := Multiply(x, h)
+	r = new(big.Int).Sub(v, r)
 	r = ModuloN(r, n)
 	return &SchnorrZKP{V, r}
 }
