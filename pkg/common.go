@@ -15,6 +15,10 @@ func ModuloN(x *big.Int, n *big.Int) *big.Int {
 	return new(big.Int).Mod(x, n)
 }
 
+func Multiply(x *big.Int, y *big.Int) *big.Int {
+	return new(big.Int).Mul(x, y)
+}
+
 func ByteToBigInt(b []byte) *big.Int {
 	return new(big.Int).SetBytes(b)
 }
@@ -31,6 +35,12 @@ func HighEntropyRandom(min *big.Int, max *big.Int) *big.Int {
 
 func GenerateKey(n *big.Int) *big.Int {
 	return HighEntropyRandom(big.NewInt(1), new(big.Int).Sub(n, big.NewInt(1)))
+}
+
+func GetG(curve elliptic.Curve) *[]byte {
+	curveParams := curve.Params()
+	g := elliptic.MarshalCompressed(curve, curveParams.Gx, curveParams.Gy)
+	return &g
 }
 
 func MultiplyG(curve elliptic.Curve, x *big.Int) []byte {
@@ -63,4 +73,10 @@ func Subtract(curve elliptic.Curve, x1 []byte, x2 []byte) []byte {
 	}
 	tx, ty := curve.Add(x1x, x1y, x2x, negY2)
 	return elliptic.MarshalCompressed(curve, tx, ty)
+}
+
+func Equal(curve elliptic.Curve, x1 []byte, x2 []byte) bool {
+	x1x, x1y := elliptic.UnmarshalCompressed(curve, x1)
+	x2x, x2y := elliptic.UnmarshalCompressed(curve, x2)
+	return x1x.Cmp(x2x) == 0 && x1y.Cmp(x2y) == 0
 }

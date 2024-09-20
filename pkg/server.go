@@ -46,17 +46,28 @@ func (s *Server) AuthInit(
 	Π1 *SchnorrZKP, // TODO: Implement ZKP Verification
 	Π2 *SchnorrZKP,
 ) ([]byte, []byte, []byte, *SchnorrZKP, *SchnorrZKP, *SchnorrZKP) {
+
+	G := GetG(s.Curve)
+	if VerifyZKP(s.Curve, *G, X1, *Π1, user) == false {
+		panic("ZKP Verification Failed for Π1")
+	}
+
+	if VerifyZKP(s.Curve, *G, X2, *Π2, user) == false {
+		panic("ZKP Verification Failed for Π2")
+	}
+
+	if user == s.ServerName {
+		panic("User and Server cannot have the same name")
+	}
+
 	s.x4 = GenerateKey(s.CurveParams.N)
 	s.X4 = MultiplyG(s.Curve, s.x4)
 	s.Π4 = GenerateZKP(s.Curve, s.CurveParams.N, s.x4, s.X4, s.ServerName)
 
-	Gβ := Add(s.Curve, X1, X2)
-	Gβ = Add(s.Curve, Gβ, s.X3)
-
-	x4Pi := new(big.Int).Mul(s.x4, π)
-	x4Pi.Mod(x4Pi, s.CurveParams.N)
+	Gβ := Add(s.Curve, Add(s.Curve, X1, X2), s.X3)
+	x4Pi := ModuloN(Multiply(s.x4, π), s.CurveParams.N)
 	s.β = MultiplyX(s.Curve, &Gβ, x4Pi)
-	s.Πβ = GenerateZKPGProvided(s.Curve, &s.β, s.CurveParams.N, x4Pi, s.β, user)
+	s.Πβ = GenerateZKPGProvided(s.Curve, &Gβ, s.CurveParams.N, x4Pi, s.β, s.ServerName)
 
 	return s.X3, s.X4, s.β, s.Π3, s.Π4, s.Πβ
 }
@@ -72,6 +83,11 @@ func (s *Server) AuthValidate(
 	α *[]byte,
 	Πα *SchnorrZKP,
 	r *big.Int) {
+
+	//Gα := Add(s.Curve, Add(s.Curve, X1, s.X3), s.X4)
+	//if VerifyZKP(s.Curve, Gα, *α, *Πα, user) == false {
+	//	panic("ZKP Verification Failed for Πα")
+	//}
 
 	x4π := new(big.Int).Mul(s.x4, π)                                // x4.multiply(pi)
 	X2x4π := MultiplyX(s.Curve, &X2, x4π.Mod(x4π, s.CurveParams.N)) // X2.multiply(x4π)
@@ -112,6 +128,21 @@ func (s *Server) AuthValidate(
 		s.X3, s.X4,
 		X1, X2,
 	)
+
+	//if (G.multiply(rValue).add(T.multiply(hServer.mod(n))).equals(X1)) {
+	//	System.out.println("Server checks rValue (for client authentication): OK");
+	//}else {
+	//	System.out.println("ERROR: invalid r (client authentication failed).");
+	//	System.exit(0);
+	//}
+
+	GxRv := MultiplyX(s.Curve, GetG(s.Curve), r)
+	hServerModN := ModuloN(hServer, s.CurveParams.N)
+	TxH := MultiplyX(s.Curve, &T, hServerModN)
+	X1x := Add(s.Curve, GxRv, TxH)
+	if !Equal(s.Curve, X1, X1x) {
+		panic("ERROR: invalid r (client authentication failed).")
+	}
 
 	println("RawServerKey:", new(big.Int).SetBytes(rawServerKey).String())
 	println("serverSessionKey:", serverSessionKey.String())
