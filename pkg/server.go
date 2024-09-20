@@ -63,7 +63,12 @@ func (s *Server) AuthInit(
 
 func (s *Server) AuthValidate(
 	π *big.Int,
+	T []byte,
+	user string,
+	X1 []byte,
 	X2 []byte,
+	Π1 *SchnorrZKP, // TODO: Implement ZKP Verification
+	Π2 *SchnorrZKP,
 	α *[]byte,
 	Πα *SchnorrZKP,
 	r *big.Int) {
@@ -76,7 +81,42 @@ func (s *Server) AuthValidate(
 	serverSessionKey := Hash(rawServerKey, SessionKey)
 	serverKCKey := Hash(rawServerKey, ConfirmationKey)
 
+	hServer := Hash(
+		rawServerKey,
+		user,
+		X1, X2,
+		Π1, Π2,
+		s.ServerName,
+		s.X3, s.X4,
+		s.Π3, s.Π4,
+		s.β, s.Πβ,
+		*α, Πα,
+	)
+
+	hServer = ModuloN(hServer, s.CurveParams.N)
+
+	clientKCTag2 := DeriveHMACTag(
+		serverKCKey,
+		"KC_1_U",
+		user,
+		s.ServerName,
+		X1, X2,
+		s.X3, s.X4,
+	)
+
+	serverKCTag := DeriveHMACTag(
+		serverKCKey,
+		"KC_1_V",
+		s.ServerName,
+		user,
+		s.X3, s.X4,
+		X1, X2,
+	)
+
 	println("RawServerKey:", new(big.Int).SetBytes(rawServerKey).String())
 	println("serverSessionKey:", serverSessionKey.String())
 	println("serverKCKey:", serverKCKey.String())
+	println("Server hTranscript:", hServer.String())
+	println("Server KCTag:", serverKCTag.String())
+	println("Client KCTag:", clientKCTag2.String())
 }

@@ -124,6 +124,8 @@ func (c *Client) AuthValidate(
 	println("clientSessionKey:", clientSessionKey.String())
 	println("clientKCKey:", clientKCKey.String())
 	println("clientKCTag:", clientKCTag.String())
+	println("Client hTranscript:", hTranscript.String())
+	println("rValue:", rValue.String())
 
 	return c.α, c.Πα, c.r
 }

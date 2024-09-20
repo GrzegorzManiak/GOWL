@@ -80,5 +80,5 @@ func main() {
 	//
 	// -- Authentication Validate SERVER -- //
 	//
-	server.AuthValidate(π, X2, α, Πα, r)
+	server.AuthValidate(π, T, user, X1, X2, Π1, Π2, α, Πα, r)
 }
