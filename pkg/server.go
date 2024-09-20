@@ -60,3 +60,23 @@ func (s *Server) AuthInit(
 
 	return s.X3, s.X4, s.β, s.Π3, s.Π4, s.Πβ
 }
+
+func (s *Server) AuthValidate(
+	π *big.Int,
+	X2 []byte,
+	α *[]byte,
+	Πα *SchnorrZKP,
+	r *big.Int) {
+
+	x4π := new(big.Int).Mul(s.x4, π)                                // x4.multiply(pi)
+	X2x4π := MultiplyX(s.Curve, &X2, x4π.Mod(x4π, s.CurveParams.N)) // X2.multiply(x4π)
+	rawServerKey := Subtract(s.Curve, *α, X2x4π)                    // X2x4π.subtract(α)
+	rawServerKey = MultiplyX(s.Curve, &rawServerKey, s.x4)          // rawServerKey.multiply(x4)
+
+	serverSessionKey := Hash(rawServerKey, SessionKey)
+	serverKCKey := Hash(rawServerKey, ConfirmationKey)
+
+	println("RawServerKey:", new(big.Int).SetBytes(rawServerKey).String())
+	println("serverSessionKey:", serverSessionKey.String())
+	println("serverKCKey:", serverKCKey.String())
+}

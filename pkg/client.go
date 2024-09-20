@@ -75,11 +75,7 @@ func (c *Client) AuthValidate(
 	Π3 *SchnorrZKP,
 	Π4 *SchnorrZKP,
 	Πβ *SchnorrZKP,
-) {
-	c.x2, _ = new(big.Int).SetString("28048054698464670087075807131323991123069734699031281255718814425862565568869", 10)
-	X1RAW, _ := new(big.Int).SetString("291527873065038658029434543999156023191731888933086013964755314683727060351946", 10)
-	c.X1 = X1RAW.Bytes()
-
+) (*[]byte, *SchnorrZKP, *big.Int) {
 	Gα := Add(c.Curve, c.X1, X3)
 	Gα = Add(c.Curve, Gα, X4)
 
@@ -124,7 +120,10 @@ func (c *Client) AuthValidate(
 		X3, X4,
 	)
 
-	println("Client Key Confirmation Tag: ", clientKCTag.String())
-	println("Client Session Key: ", clientSessionKey.String())
+	println("RawServerKey:", new(big.Int).SetBytes(rawClientKey).String())
+	println("clientSessionKey:", clientSessionKey.String())
+	println("clientKCKey:", clientKCKey.String())
+	println("clientKCTag:", clientKCTag.String())
 
+	return c.α, c.Πα, c.r
 }
