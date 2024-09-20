@@ -30,6 +30,10 @@ type Client struct {
 	α  *[]byte     // α = (X1X3X4)x2·π
 	Πα *SchnorrZKP // Πα = ZKP{x2 · π}
 	r  *big.Int    // r = x1 − t · h mod q
+
+	// -- Session Key -- //
+	ClientSessionKey *big.Int
+	ClientKCKey      *big.Int
 }
 
 func ClientInit(user string, pass string, serverName string, curve elliptic.Curve) *Client {
@@ -89,8 +93,8 @@ func (c *Client) AuthValidate(
 	rawClientKey := Subtract(c.Curve, β, X4x2π)
 	rawClientKey = MultiplyX(c.Curve, &rawClientKey, c.x2)
 
-	clientSessionKey := Hash(rawClientKey, SessionKey)
-	clientKCKey := Hash(rawClientKey, ConfirmationKey)
+	c.ClientSessionKey = Hash(rawClientKey, SessionKey)
+	c.ClientKCKey = Hash(rawClientKey, ConfirmationKey)
 
 	hTranscript := Hash(
 		rawClientKey,
@@ -112,7 +116,7 @@ func (c *Client) AuthValidate(
 	c.r = rValue
 
 	clientKCTag := DeriveHMACTag(
-		clientKCKey,
+		c.ClientKCKey,
 		"KC_1_U",
 		c.UserIdentifier,
 		c.ServerName,
@@ -121,11 +125,27 @@ func (c *Client) AuthValidate(
 	)
 
 	println("RawServerKey:", new(big.Int).SetBytes(rawClientKey).String())
-	println("clientSessionKey:", clientSessionKey.String())
-	println("clientKCKey:", clientKCKey.String())
+	println("clientSessionKey:", c.ClientSessionKey.String())
+	println("clientKCKey:", c.ClientKCKey.String())
 	println("clientKCTag:", clientKCTag.String())
 	println("Client hTranscript:", hTranscript.String())
 	println("rValue:", rValue.String())
 
 	return c.α, c.Πα, c.r
+}
+
+func (c *Client) VerifyResponse(
+	X3 []byte,
+	X4 []byte,
+) {
+	serverKCTag2 := DeriveHMACTag(
+		c.ClientKCKey,
+		"KC_1_V",
+		c.ServerName,
+		c.UserIdentifier,
+		X3, X4,
+		c.X1, c.X2,
+	)
+
+	println("Server KCTag2:", serverKCTag2.String())
 }

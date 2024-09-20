@@ -81,4 +81,7 @@ func main() {
 	// -- Authentication Validate SERVER -- //
 	//
 	server.AuthValidate(π, T, user, X1, X2, Π1, Π2, α, Πα, r)
+
+	// OPT: Client verifies response from server
+	client.VerifyResponse(X3, X4)
 }
