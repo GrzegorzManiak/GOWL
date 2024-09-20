@@ -19,10 +19,6 @@ func Multiply(x *big.Int, y *big.Int) *big.Int {
 	return new(big.Int).Mul(x, y)
 }
 
-func ByteToBigInt(b []byte) *big.Int {
-	return new(big.Int).SetBytes(b)
-}
-
 func HighEntropyRandom(min *big.Int, max *big.Int) *big.Int {
 	rangeBigInt := new(big.Int).Sub(max, min)
 	randomBigInt, err := rand.Int(rand.Reader, rangeBigInt)
@@ -79,4 +75,15 @@ func Equal(curve elliptic.Curve, x1 []byte, x2 []byte) bool {
 	x1x, x1y := elliptic.UnmarshalCompressed(curve, x1)
 	x2x, x2y := elliptic.UnmarshalCompressed(curve, x2)
 	return x1x.Cmp(x2x) == 0 && x1y.Cmp(x2y) == 0
+}
+
+func IsInfinity(xX *big.Int, xY *big.Int) bool {
+	return xX == nil && xY == nil
+}
+
+func calculateCofactor(curve elliptic.Curve) *big.Int {
+	order := curve.Params().N
+	totalPoints := new(big.Int).Set(order)
+	cofactor := new(big.Int).Div(totalPoints, order)
+	return cofactor
 }

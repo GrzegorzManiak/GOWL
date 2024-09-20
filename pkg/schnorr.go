@@ -28,8 +28,7 @@ func GenerateZKPGProvided(
 	X []byte,
 	userID string,
 ) *SchnorrZKP {
-	//v := GenerateKey(n)
-	v, _ := new(big.Int).SetString("305027369702916771285353512566489202667490348064085757562196090488234633831774", 10)
+	v := GenerateKey(n)
 	V := MultiplyX(generator, g, v)
 	h := Hash(*g, V, X, userID)
 	r := Multiply(x, h)
@@ -47,27 +46,33 @@ func VerifyZKP(
 ) bool {
 	h := Hash(generator, zkp.V, X, userID)
 
-	if X == nil {
+	if X == nil || zkp.V == nil || zkp.R == nil {
 		return false
 	}
 
-	Xx, Xy := elliptic.UnmarshalCompressed(curve, X)
-	if Xx == nil || Xy == nil {
+	xX, xY := elliptic.UnmarshalCompressed(curve, X)
+	if IsInfinity(xX, xY) {
 		return false
 	}
 
-	if !curve.IsOnCurve(Xx, Xy) {
+	if xX.Cmp(big.NewInt(0)) == -1 || xX.Cmp(new(big.Int).Sub(curve.Params().N, big.NewInt(1))) == 1 {
 		return false
 	}
 
-	Vx, Vy := elliptic.UnmarshalCompressed(curve, zkp.V)
-	if Vx == nil || Vy == nil {
+	if xY.Cmp(big.NewInt(0)) == -1 || xY.Cmp(new(big.Int).Sub(curve.Params().N, big.NewInt(1))) == 1 {
 		return false
 	}
 
-	rGx, rGy := curve.ScalarBaseMult(zkp.R.Bytes())
-	hXx, hXy := curve.ScalarMult(Xx, Xy, h.Bytes())
-	sumX, sumY := curve.Add(rGx, rGy, hXx, hXy)
+	if !curve.IsOnCurve(xX, xY) {
+		return false
+	}
 
-	return sumX.Cmp(Vx) == 0 && sumY.Cmp(Vy) == 0
+	xXh := MultiplyX(curve, &X, calculateCofactor(curve))
+	xXhX, xXhY := elliptic.UnmarshalCompressed(curve, xXh)
+	if IsInfinity(xXhX, xXhY) {
+		return false
+	}
+
+	gRxhmn := Add(curve, MultiplyX(curve, &generator, zkp.R), MultiplyX(curve, &X, ModuloN(h, curve.Params().N)))
+	return Equal(curve, zkp.V, gRxhmn)
 }

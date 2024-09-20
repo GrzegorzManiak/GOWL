@@ -4,46 +4,9 @@ import (
 	"GOWL/pkg"
 	"crypto/elliptic"
 	"fmt"
-	"math/big"
 )
 
 func main() {
-
-	curve := elliptic.P256()
-	x4, _ := new(big.Int).SetString("92924331714289309598568614385937331082154360548563534854722084561713080926489", 10)
-	X1, _ := new(big.Int).SetString("288438714641929240027029931372999143558714506934172228766293993205802594260844", 10)
-	X2, _ := new(big.Int).SetString("453734318552357647078608644220761958869868470888134244220420421725657807268071", 10)
-	X3, _ := new(big.Int).SetString("246086805365699144396089482588823946208867075564847145794408353263640742077663", 10)
-	PI, _ := new(big.Int).SetString("100576120785382412396175613629765631892883317383397924468689937592634486189794", 10)
-
-	X1Bytes := X1.Bytes()
-	X2Bytes := X2.Bytes()
-	X3Bytes := X3.Bytes()
-
-	Gβ := pkg.Add(curve, pkg.Add(curve, X1Bytes, X2Bytes), X3Bytes)
-	x4Pi := pkg.ModuloN(pkg.Multiply(x4, PI), curve.Params().N)
-	β := pkg.MultiplyX(curve, &Gβ, x4Pi)
-
-	// -- Print out GBeta, x4Pi, and Beta
-	fmt.Println("Gβ:", new(big.Int).SetBytes(Gβ).String())
-	fmt.Println("x4Pi:", x4Pi.String())
-	fmt.Println("β:", new(big.Int).SetBytes(β).String())
-
-	g := pkg.GetG(curve)
-	zkpBeta := pkg.GenerateZKPGProvided(
-		curve,
-		&Gβ,
-		curve.Params().N,
-		x4Pi,
-		β,
-		"Server",
-	)
-
-	isValid := pkg.VerifyZKP(curve, *g, β, *zkpBeta, "Server")
-	fmt.Println("Is Valid:", isValid)
-}
-
-func main2() {
 	curve := elliptic.P256()
 	user := "Alice"
 	pass := "deadbeef"

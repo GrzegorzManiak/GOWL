@@ -86,21 +86,21 @@ func (s *Server) AuthValidate(
 	user string,
 	X1 []byte,
 	X2 []byte,
-	Π1 *SchnorrZKP, // TODO: Implement ZKP Verification
+	Π1 *SchnorrZKP,
 	Π2 *SchnorrZKP,
 	α *[]byte,
 	Πα *SchnorrZKP,
 	r *big.Int) (*big.Int, *big.Int) {
 
-	//Gα := Add(s.Curve, Add(s.Curve, X1, s.X3), s.X4)
-	//if VerifyZKP(s.Curve, Gα, *α, *Πα, user) == false {
-	//	panic("ZKP Verification Failed for Πα")
-	//}
+	Gα := Add(s.Curve, Add(s.Curve, X1, s.X3), s.X4)
+	if VerifyZKP(s.Curve, Gα, *α, *Πα, user) == false {
+		panic("ZKP Verification Failed for Πα")
+	}
 
-	x4π := new(big.Int).Mul(s.x4, π)                                // x4.multiply(pi)
-	X2x4π := MultiplyX(s.Curve, &X2, x4π.Mod(x4π, s.CurveParams.N)) // X2.multiply(x4π)
-	rawServerKey := Subtract(s.Curve, *α, X2x4π)                    // X2x4π.subtract(α)
-	rawServerKey = MultiplyX(s.Curve, &rawServerKey, s.x4)          // rawServerKey.multiply(x4)
+	x4π := new(big.Int).Mul(s.x4, π)
+	X2x4π := MultiplyX(s.Curve, &X2, x4π.Mod(x4π, s.CurveParams.N))
+	rawServerKey := Subtract(s.Curve, *α, X2x4π)
+	rawServerKey = MultiplyX(s.Curve, &rawServerKey, s.x4)
 
 	serverSessionKey := Hash(rawServerKey, SessionKey)
 	serverKCKey := Hash(rawServerKey, ConfirmationKey)
