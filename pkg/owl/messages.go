@@ -1,7 +1,7 @@
 package owl
 
 import (
-	"GOWL/pkg/crypto"
+	"github.com/GrzegorzManiak/GOWL/pkg/crypto"
 	"math/big"
 )
 
@@ -63,7 +63,6 @@ type RegistrationResponse struct {
 }
 
 type ServerAuthInitResponsePayload struct {
-	S  []byte
 	X3 []byte
 	X4 []byte
 	Π3 *crypto.SchnorrZKP
@@ -74,8 +73,8 @@ type ServerAuthInitResponsePayload struct {
 
 type ServerAuthInitResponse struct {
 	Payload *ServerAuthInitResponsePayload
-	x3      *big.Int
 	x4      *big.Int
+	Gβ      []byte
 }
 
 type ServerAuthValidateResponsePayload struct {

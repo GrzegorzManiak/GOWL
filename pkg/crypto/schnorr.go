@@ -68,7 +68,7 @@ func VerifyZKP(
 		return false
 	}
 
-	xXh := MultiplyPoint(curve, &X, calculateCofactor(curve))
+	xXh := MultiplyPoint(curve, &X, CalculateCofactor(curve))
 	xXhX, xXhY := elliptic.UnmarshalCompressed(curve, xXh)
 	if IsInfinity(xXhX, xXhY) {
 		return false

@@ -1,9 +1,9 @@
 package owl
 
 import (
-	"GOWL/pkg/crypto"
 	"crypto/elliptic"
 	"errors"
+	"github.com/GrzegorzManiak/GOWL/pkg/crypto"
 	"math/big"
 )
 
@@ -86,33 +86,33 @@ func (client *Client) AuthInit() *ClientAuthInitRequest {
 }
 
 func (client *Client) AuthValidate(
-	init *ClientAuthInitRequest,
-	data *ServerAuthInitResponsePayload,
+	clientInit *ClientAuthInitRequest,
+	serverInit *ServerAuthInitResponsePayload,
 ) (*ClientAuthValidateRequest, error) {
 
 	curve := client.Curve
 	G := crypto.GetG(client.Curve)
 
-	if !crypto.VerifyZKP(curve, G, data.X3, *data.Π3, client.ServerName) {
+	if !crypto.VerifyZKP(curve, G, serverInit.X3, *serverInit.Π3, client.ServerName) {
 		return nil, errors.New("ZKP Verification Failed for Π3")
 	}
 
-	if !crypto.VerifyZKP(curve, G, data.X4, *data.Π4, client.ServerName) {
+	if !crypto.VerifyZKP(curve, G, serverInit.X4, *serverInit.Π4, client.ServerName) {
 		return nil, errors.New("ZKP Verification Failed for Π4")
 	}
 
-	Gβ := crypto.AddPoints(curve, crypto.AddPoints(curve, init.Payload.X1, init.Payload.X2), data.X3)
-	if !crypto.VerifyZKP(curve, Gβ, data.β, *data.Πβ, client.ServerName) {
+	Gβ := crypto.AddPoints(curve, crypto.AddPoints(curve, clientInit.Payload.X1, clientInit.Payload.X2), serverInit.X3)
+	if !crypto.VerifyZKP(curve, Gβ, serverInit.β, *serverInit.Πβ, client.ServerName) {
 		return nil, errors.New("ZKP Verification Failed for Πβ")
 	}
 
-	Gα := crypto.AddPoints(curve, crypto.AddPoints(curve, init.Payload.X1, data.X3), data.X4)
-	x2π := crypto.ModuloN(crypto.Multiply(init.x2, client.π), client.CurveParams.N)
+	Gα := crypto.AddPoints(curve, crypto.AddPoints(curve, clientInit.Payload.X1, serverInit.X3), serverInit.X4)
+	x2π := crypto.ModuloN(crypto.Multiply(clientInit.x2, client.π), client.CurveParams.N)
 	α := crypto.MultiplyPoint(curve, &Gα, x2π)
 	Πα := crypto.GenerateZKPGProvided(curve, Gα, client.CurveParams.N, x2π, α, client.UserIdentifier)
 
-	rawClientKey := crypto.SubtractPoints(curve, data.β, crypto.MultiplyPoint(curve, &data.X4, x2π))
-	rawClientKey = crypto.MultiplyPoint(curve, &rawClientKey, init.x2)
+	rawClientKey := crypto.SubtractPoints(curve, serverInit.β, crypto.MultiplyPoint(curve, &serverInit.X4, x2π))
+	rawClientKey = crypto.MultiplyPoint(curve, &rawClientKey, clientInit.x2)
 
 	clientSessionKey := crypto.Hash(rawClientKey, SessionKey)
 	clientKCKey := crypto.Hash(rawClientKey, ConfirmationKey)
@@ -120,17 +120,17 @@ func (client *Client) AuthValidate(
 	hTranscript := crypto.Hash(
 		rawClientKey,
 		client.UserIdentifier,
-		init.Payload.X1, init.Payload.X2,
-		init.Payload.Π1, init.Payload.Π2,
+		clientInit.Payload.X1, clientInit.Payload.X2,
+		clientInit.Payload.Π1, clientInit.Payload.Π2,
 		client.ServerName,
-		data.X3, data.X4,
-		*data.Π3, *data.Π4,
-		data.β, *data.Πβ,
+		serverInit.X3, serverInit.X4,
+		*serverInit.Π3, *serverInit.Π4,
+		serverInit.β, *serverInit.Πβ,
 		α, Πα,
 	)
 
 	hTranscript = crypto.ModuloN(hTranscript, client.CurveParams.N)
-	rValue := crypto.Subtract(init.x1, crypto.Multiply(client.t, hTranscript))
+	rValue := crypto.Subtract(clientInit.x1, crypto.Multiply(client.t, hTranscript))
 	rValue = crypto.ModuloN(rValue, client.CurveParams.N)
 
 	clientKCTag := crypto.DeriveHMACTag(
@@ -138,8 +138,8 @@ func (client *Client) AuthValidate(
 		ClientKCKeyTag,
 		client.UserIdentifier,
 		client.ServerName,
-		init.Payload.X1, init.Payload.X2,
-		data.X3, data.X4,
+		clientInit.Payload.X1, clientInit.Payload.X2,
+		serverInit.X3, serverInit.X4,
 	)
 
 	payload := &ClientAuthValidateRequestPayload{
@@ -159,22 +159,22 @@ func (client *Client) AuthValidate(
 }
 
 func (client *Client) VerifyResponse(
-	clientAuthInit *ClientAuthInitRequest,
-	clientAuthValidate *ClientAuthValidateRequest,
-	serverAuthInit *ServerAuthInitResponsePayload,
-	data *ServerAuthValidateResponsePayload,
+	clientInit *ClientAuthInitRequest,
+	clientValidate *ClientAuthValidateRequest,
+	serverInit *ServerAuthInitResponsePayload,
+	serverValidate *ServerAuthValidateResponsePayload,
 ) error {
 
 	serverKCTag2 := crypto.DeriveHMACTag(
-		clientAuthValidate.ClientKCKey,
+		clientValidate.ClientKCKey,
 		ServerKCKeyTag,
 		client.ServerName,
 		client.UserIdentifier,
-		serverAuthInit.X3, serverAuthInit.X4,
-		clientAuthInit.Payload.X1, clientAuthInit.Payload.X2,
+		serverInit.X3, serverInit.X4,
+		clientInit.Payload.X1, clientInit.Payload.X2,
 	)
 
-	if serverKCTag2.Cmp(data.ServerKCTag) != 0 {
+	if serverKCTag2.Cmp(serverValidate.ServerKCTag) != 0 {
 		return errors.New("ERROR: invalid r (client authentication failed)")
 	}
 

@@ -52,6 +52,14 @@ func Hash(args ...interface{}) *big.Int {
 			sha256Output.Write(IntTo4Bytes(len(rBytes)))
 			sha256Output.Write(rBytes)
 
+		case SchnorrZKP:
+			vEncoded := v.V
+			rBytes := v.R.Bytes()
+			sha256Output.Write(IntTo4Bytes(len(vEncoded)))
+			sha256Output.Write(vEncoded)
+			sha256Output.Write(IntTo4Bytes(len(rBytes)))
+			sha256Output.Write(rBytes)
+
 		default:
 			panic("Invalid type passed to Hash: " + reflect.TypeOf(v).String())
 		}
