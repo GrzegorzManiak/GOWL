@@ -13,8 +13,68 @@ Yes, it works. I have tested it with the Java implementation provided by the aut
 I wanted to learn Go and I thought that implementing the OWL aPake protocol would be a good way to learn Go.
 
 ## How to use it?
+
+Each function returns a struct that contains a `payload`, this payload is the **Only Data** that should be sent to the other party.
+
 ```go
-// -- Will be addes as soon as I refactor the code
+curve := elliptic.P256()
+user := "Alice"
+pass := "deadbeef"
+serverName := "Server"
+
+// -- Register
+client, err := owl.ClientInit(user, pass, serverName, curve)
+if err != nil {
+    fmt.Println(err)
+    return
+}
+
+clientRegistration := client.Register()
+
+server, err := owl.ServerInit(serverName, curve, clientRegistration.Payload)
+if err != nil {
+    fmt.Println(err)
+    return
+}
+
+serverRegistration := server.RegisterUser()
+
+// -- Auth Init
+clientInit := client.AuthInit()
+serverInit, err := server.AuthInit(serverRegistration, clientInit.Payload)
+if err != nil {
+    fmt.Println(err)
+    return
+}
+
+// -- Auth Validate
+clientValidate, err := client.AuthValidate(clientInit, serverInit.Payload)
+if err != nil {
+    fmt.Println(err)
+    return
+}
+
+serverValidate, err := server.AuthValidate(clientInit.Payload, clientValidate.Payload, serverInit)
+if err != nil {
+    fmt.Println(err)
+    return
+}
+
+println("Client Session Key:", clientValidate.ClientSessionKey.String())
+println("Server Session Key:", serverValidate.ServerSessionKey.String())
+
+// -- Verify Response (Optional)
+err = client.VerifyResponse(
+    clientInit,
+    clientValidate,
+    serverInit.Payload,
+    serverValidate.Payload,
+)
+
+if err != nil {
+fmt.Println(err)
+return
+}
 ```
 
 ## Resources
