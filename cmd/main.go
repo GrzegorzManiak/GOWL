@@ -31,6 +31,7 @@ func main() {
 
 	// -- Auth Init
 	clientInit := client.AuthInit()
+
 	serverInit, err := server.AuthInit(serverRegistration, clientInit.Payload)
 	if err != nil {
 		fmt.Println(err)
