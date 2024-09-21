@@ -1,4 +1,4 @@
-package pkg
+package crypto
 
 import (
 	"crypto/elliptic"
@@ -17,20 +17,21 @@ func GenerateZKP(
 	X []byte,
 	userID string,
 ) *SchnorrZKP {
-	return GenerateZKPGProvided(generator, GetG(generator), n, x, X, userID)
+	g := GetG(generator)
+	return GenerateZKPGProvided(generator, g, n, x, X, userID) // No need for &g
 }
 
 func GenerateZKPGProvided(
 	generator elliptic.Curve,
-	g *[]byte,
+	g []byte, // No pointer needed
 	n *big.Int,
 	x *big.Int,
 	X []byte,
 	userID string,
 ) *SchnorrZKP {
 	v := GenerateKey(n)
-	V := MultiplyX(generator, g, v)
-	h := Hash(*g, V, X, userID)
+	V := MultiplyPoint(generator, &g, v)
+	h := Hash(g, V, X, userID)
 	r := Multiply(x, h)
 	r = new(big.Int).Sub(v, r)
 	r = ModuloN(r, n)
@@ -67,12 +68,12 @@ func VerifyZKP(
 		return false
 	}
 
-	xXh := MultiplyX(curve, &X, calculateCofactor(curve))
+	xXh := MultiplyPoint(curve, &X, calculateCofactor(curve))
 	xXhX, xXhY := elliptic.UnmarshalCompressed(curve, xXh)
 	if IsInfinity(xXhX, xXhY) {
 		return false
 	}
 
-	gRxhmn := Add(curve, MultiplyX(curve, &generator, zkp.R), MultiplyX(curve, &X, ModuloN(h, curve.Params().N)))
-	return Equal(curve, zkp.V, gRxhmn)
+	gRxhmn := AddPoints(curve, MultiplyPoint(curve, &generator, zkp.R), MultiplyPoint(curve, &X, ModuloN(h, curve.Params().N)))
+	return PointsEqual(curve, zkp.V, gRxhmn)
 }

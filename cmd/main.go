@@ -1,7 +1,7 @@
 package main
 
 import (
-	"GOWL/pkg"
+	"GOWL/pkgTEMP"
 	"crypto/elliptic"
 	"fmt"
 )
@@ -16,14 +16,14 @@ func main() {
 	// -- Registration CLIENT -- //
 	// Client Sends: user, t, π, T
 
-	client := pkg.ClientInit(user, pass, serverName, curve)
+	client := pkgTEMP.ClientInit(user, pass, serverName, curve)
 	_, π, T := client.Register()
 
 	//
 	// -- Registration SERVER -- //
 	// Store: X3, zkpX4, user, pi, T
 
-	server := pkg.ServerInit(serverName, curve)
+	server := pkgTEMP.ServerInit(serverName, curve)
 	X3, _ := server.RegisterUser()
 
 	//

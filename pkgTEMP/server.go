@@ -1,4 +1,4 @@
-package pkg
+package pkgTEMP
 
 import (
 	"crypto/elliptic"

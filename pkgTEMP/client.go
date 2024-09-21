@@ -1,4 +1,4 @@
-package pkg
+package pkgTEMP
 
 import (
 	"crypto/elliptic"
@@ -96,7 +96,7 @@ func (c *Client) AuthValidate(
 	}
 
 	Gα := Add(c.Curve, c.X1, X3)
-	Gα = Add(c.Curve, Gα, X4)
+	Gα = Add(c.Curve, Add(c.Curve, c.X1, X3), X4)
 
 	x2π := new(big.Int).Mul(c.x2, c.π)
 	x2π.Mod(x2π, c.CurveParams.N)
