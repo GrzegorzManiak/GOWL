@@ -114,7 +114,7 @@ func (server *Server) AuthValidate(
 	serverKCKey := crypto.Hash(rawServerKey, ConfirmationKey)
 
 	hServer := crypto.Hash(
-		serverKCKey,
+		rawServerKey,
 		server.UserIdentifier,
 		clientInit.X1, clientInit.X2,
 		clientInit.Π1, clientInit.Π2,
