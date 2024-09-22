@@ -71,7 +71,7 @@ func (payload *ClientAuthInitRequestPayload) Marshal() ([]byte, error) {
 		PI2_V          string `json:"PI2_V"`
 		PI2_R          string `json:"PI2_R"`
 	}{
-		UserIdentifier: payload.UserIdentifier,
+		UserIdentifier: payload.U,
 		X1:             crypto.B64Encode(payload.X1),
 		X2:             crypto.B64Encode(payload.X2),
 		PI1_V:          crypto.B64Encode(payload.Π1.V),
@@ -96,7 +96,7 @@ func (payload *ClientAuthInitRequestPayload) Unmarshal(data []byte) error {
 		return err
 	}
 
-	payload.UserIdentifier = aux.UserIdentifier
+	payload.U = aux.UserIdentifier
 	payload.X1 = crypto.B64DecodeBytes(aux.X1)
 	payload.X2 = crypto.B64DecodeBytes(aux.X2)
 

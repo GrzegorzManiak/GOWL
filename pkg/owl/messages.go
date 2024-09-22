@@ -21,11 +21,11 @@ type RegistrationRequest struct {
 }
 
 type ClientAuthInitRequestPayload struct {
-	UserIdentifier string
-	X1             []byte
-	X2             []byte
-	Π1             *crypto.SchnorrZKP
-	Π2             *crypto.SchnorrZKP
+	U  string
+	X1 []byte
+	X2 []byte
+	Π1 *crypto.SchnorrZKP
+	Π2 *crypto.SchnorrZKP
 }
 
 type ClientAuthInitRequest struct {

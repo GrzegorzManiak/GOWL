@@ -71,11 +71,11 @@ func (client *Client) AuthInit() *ClientAuthInitRequest {
 	Π2 := crypto.GenerateZKPGProvided(client.Curve, G, client.CurveParams.N, x2, X2, client.UserIdentifier)
 
 	payload := &ClientAuthInitRequestPayload{
-		UserIdentifier: client.UserIdentifier,
-		X1:             X1,
-		X2:             X2,
-		Π1:             Π1,
-		Π2:             Π2,
+		U:  client.UserIdentifier,
+		X1: X1,
+		X2: X2,
+		Π1: Π1,
+		Π2: Π2,
 	}
 
 	return &ClientAuthInitRequest{
