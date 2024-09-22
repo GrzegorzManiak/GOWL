@@ -81,7 +81,7 @@ func (server *Server) AuthInit(
 		X4: X4,
 		Π3: serverRegistration.Payload.Π3,
 		Π4: Π4,
-		β:  β,
+		B:  β,
 		Πβ: Πβ,
 	}
 
@@ -121,7 +121,7 @@ func (server *Server) AuthValidate(
 		server.ServerName,
 		serverInit.Payload.X3, serverInit.Payload.X4,
 		serverInit.Payload.Π3, serverInit.Payload.Π4,
-		serverInit.Payload.β, serverInit.Payload.Πβ,
+		serverInit.Payload.B, serverInit.Payload.Πβ,
 		clientValidate.α, clientValidate.Πα,
 	)
 

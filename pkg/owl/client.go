@@ -102,7 +102,7 @@ func (client *Client) AuthValidate(
 	}
 
 	Gβ := crypto.AddPoints(curve, crypto.AddPoints(curve, clientInit.Payload.X1, clientInit.Payload.X2), serverInit.X3)
-	if !crypto.VerifyZKP(curve, Gβ, serverInit.β, *serverInit.Πβ, client.ServerName) {
+	if !crypto.VerifyZKP(curve, Gβ, serverInit.B, *serverInit.Πβ, client.ServerName) {
 		return nil, errors.New("ZKP Verification Failed for Πβ")
 	}
 
@@ -111,7 +111,7 @@ func (client *Client) AuthValidate(
 	α := crypto.MultiplyPoint(curve, &Gα, x2π)
 	Πα := crypto.GenerateZKPGProvided(curve, Gα, client.CurveParams.N, x2π, α, client.UserIdentifier)
 
-	rawClientKey := crypto.SubtractPoints(curve, serverInit.β, crypto.MultiplyPoint(curve, &serverInit.X4, x2π))
+	rawClientKey := crypto.SubtractPoints(curve, serverInit.B, crypto.MultiplyPoint(curve, &serverInit.X4, x2π))
 	rawClientKey = crypto.MultiplyPoint(curve, &rawClientKey, clientInit.x2)
 
 	clientSessionKey := crypto.Hash(rawClientKey, SessionKey)
@@ -125,7 +125,7 @@ func (client *Client) AuthValidate(
 		client.ServerName,
 		serverInit.X3, serverInit.X4,
 		*serverInit.Π3, *serverInit.Π4,
-		serverInit.β, *serverInit.Πβ,
+		serverInit.B, *serverInit.Πβ,
 		α, Πα,
 	)
 

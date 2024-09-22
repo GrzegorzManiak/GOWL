@@ -274,7 +274,7 @@ func (payload *ServerAuthInitResponsePayload) Marshal() ([]byte, error) {
 		Pi3_R:    crypto.B64Encode(payload.Π3.R),
 		Pi4_V:    crypto.B64Encode(payload.Π4.V),
 		Pi4_R:    crypto.B64Encode(payload.Π4.R),
-		Beta:     crypto.B64Encode(payload.β),
+		Beta:     crypto.B64Encode(payload.B),
 		PIBeta_V: crypto.B64Encode(payload.Πβ.V),
 		PIBeta_R: crypto.B64Encode(payload.Πβ.R),
 	})
@@ -310,7 +310,7 @@ func (payload *ServerAuthInitResponsePayload) Unmarshal(data []byte) error {
 		R: crypto.B64DecodeBigInt(aux.Pi4_R),
 	}
 
-	payload.β = crypto.B64DecodeBytes(aux.Beta)
+	payload.B = crypto.B64DecodeBytes(aux.Beta)
 
 	payload.Πβ = &crypto.SchnorrZKP{
 		V: crypto.B64DecodeBytes(aux.PIBeta_V),

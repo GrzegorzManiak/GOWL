@@ -67,7 +67,7 @@ type ServerAuthInitResponsePayload struct {
 	X4 []byte
 	Π3 *crypto.SchnorrZKP
 	Π4 *crypto.SchnorrZKP
-	β  []byte
+	B  []byte
 	Πβ *crypto.SchnorrZKP
 }
 
