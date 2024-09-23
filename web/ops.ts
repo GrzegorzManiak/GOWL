@@ -79,6 +79,11 @@ async function Hash(...args: Array<Uint8Array | bigint | string>): Promise<bigin
     return bytesToNumberBE(new Uint8Array(hash));
 };
 
+function GetG(curve: SupportedCurves): ProjPointType<bigint> {
+    const c = GetCurve(curve);
+    return GetCurve(curve).ProjectivePoint.fromAffine({ x: c.CURVE.Gx, y: c.CURVE.Gy });
+}
+
 export {
     GetCurve,
     EncodeToBase64,
@@ -87,5 +92,6 @@ export {
     GenerateKey,
     IntTo4Bytes,
     ToBytes,
+    GetG,
     Hash
 }
