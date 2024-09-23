@@ -21,7 +21,7 @@ func GenerateKey(n *big.Int) *big.Int {
 }
 
 func ModuloN(x *big.Int, n *big.Int) *big.Int {
-	return new(big.Int).Mod(x, n)
+	return new(big.Int).Mod(new(big.Int).Add(x, n), n)
 }
 
 func Multiply(x *big.Int, y *big.Int) *big.Int {

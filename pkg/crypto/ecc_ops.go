@@ -43,6 +43,9 @@ func SubtractPoints(curve elliptic.Curve, x1 []byte, x2 []byte) []byte {
 func PointsEqual(curve elliptic.Curve, x1 []byte, x2 []byte) bool {
 	x1x, x1y := elliptic.UnmarshalCompressed(curve, x1)
 	x2x, x2y := elliptic.UnmarshalCompressed(curve, x2)
+	if x1x == nil || x1y == nil || x2x == nil || x2y == nil {
+		return false
+	}
 	return x1x.Cmp(x2x) == 0 && x1y.Cmp(x2y) == 0
 }
 

@@ -27,11 +27,11 @@ func GenerateZKPGProvided(
 	n *big.Int,
 	x *big.Int,
 	X []byte,
-	userID string,
+	prover string,
 ) *SchnorrZKP {
 	v := GenerateKey(n)
 	V := MultiplyPoint(generator, &g, v)
-	h := Hash(g, V, X, userID)
+	h := Hash(g, V, X, prover)
 	r := Multiply(x, h)
 	r = new(big.Int).Sub(v, r)
 	r = ModuloN(r, n)
@@ -43,9 +43,9 @@ func VerifyZKP(
 	generator []byte,
 	X []byte,
 	zkp SchnorrZKP,
-	userID string,
+	prover string,
 ) bool {
-	h := Hash(generator, zkp.V, X, userID)
+	h := Hash(generator, zkp.V, X, prover)
 
 	if X == nil || zkp.V == nil || zkp.R == nil {
 		return false
