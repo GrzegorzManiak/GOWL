@@ -38,7 +38,7 @@ type ClientAuthValidateRequestPayload struct {
 	ClientKCTag *big.Int
 	Alpha       []byte
 	PIAlpha     *crypto.SchnorrZKP
-	r           *big.Int
+	R           *big.Int
 }
 
 type ClientAuthValidateRequest struct {

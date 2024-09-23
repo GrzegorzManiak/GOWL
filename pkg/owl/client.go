@@ -146,7 +146,7 @@ func (client *Client) AuthValidate(
 		ClientKCTag: clientKCTag,
 		Alpha:       α,
 		PIAlpha:     PIAlpha,
-		r:           rValue,
+		R:           rValue,
 	}
 
 	return &ClientAuthValidateRequest{

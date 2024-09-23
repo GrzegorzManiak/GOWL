@@ -155,7 +155,7 @@ func (payload *ClientAuthValidateRequestPayload) Marshal() ([]byte, error) {
 		Alpha:       crypto.B64Encode(payload.Alpha),
 		PIAlpha_V:   crypto.B64Encode(payload.PIAlpha.V),
 		PIAlpha_R:   crypto.B64Encode(payload.PIAlpha.R),
-		R:           crypto.B64Encode(payload.r),
+		R:           crypto.B64Encode(payload.R),
 	})
 }
 
@@ -180,7 +180,7 @@ func (payload *ClientAuthValidateRequestPayload) Unmarshal(data []byte) error {
 		R: crypto.B64DecodeBigInt(aux.PIAlpha_R),
 	}
 
-	payload.r = crypto.B64DecodeBigInt(aux.R)
+	payload.R = crypto.B64DecodeBigInt(aux.R)
 
 	return nil
 }

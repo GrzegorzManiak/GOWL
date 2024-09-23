@@ -150,7 +150,7 @@ func (server *Server) AuthValidate(
 	)
 
 	G := crypto.GetG(curve)
-	GxRv := crypto.MultiplyPoint(curve, &G, clientValidate.r)
+	GxRv := crypto.MultiplyPoint(curve, &G, clientValidate.R)
 	hServerModN := crypto.ModuloN(hServer, server.CurveParams.N)
 	TxH := crypto.MultiplyPoint(curve, &server.UserRegistration.T, hServerModN)
 	X1x := crypto.AddPoints(curve, GxRv, TxH)
