@@ -12,7 +12,7 @@ func (payload *RegistrationRequestPayload) Marshal() ([]byte, error) {
 		T  string `json:"T"`
 	}{
 		U:  payload.U,
-		PI: crypto.B64Encode(payload.π),
+		PI: crypto.B64Encode(payload.PI),
 		T:  crypto.B64Encode(payload.T),
 	})
 }
@@ -29,7 +29,7 @@ func (payload *RegistrationRequestPayload) Unmarshal(data []byte) error {
 	}
 
 	payload.U = aux.U
-	payload.π = crypto.B64DecodeBigInt(aux.PI)
+	payload.PI = crypto.B64DecodeBigInt(aux.PI)
 	payload.T = crypto.B64DecodeBytes(aux.T)
 
 	return nil
@@ -74,10 +74,10 @@ func (payload *ClientAuthInitRequestPayload) Marshal() ([]byte, error) {
 		UserIdentifier: payload.U,
 		X1:             crypto.B64Encode(payload.X1),
 		X2:             crypto.B64Encode(payload.X2),
-		PI1_V:          crypto.B64Encode(payload.Π1.V),
-		PI1_R:          crypto.B64Encode(payload.Π1.R),
-		PI2_V:          crypto.B64Encode(payload.Π2.V),
-		PI2_R:          crypto.B64Encode(payload.Π2.R),
+		PI1_V:          crypto.B64Encode(payload.PI1.V),
+		PI1_R:          crypto.B64Encode(payload.PI1.R),
+		PI2_V:          crypto.B64Encode(payload.PI2.V),
+		PI2_R:          crypto.B64Encode(payload.PI2.R),
 	})
 }
 
@@ -100,12 +100,12 @@ func (payload *ClientAuthInitRequestPayload) Unmarshal(data []byte) error {
 	payload.X1 = crypto.B64DecodeBytes(aux.X1)
 	payload.X2 = crypto.B64DecodeBytes(aux.X2)
 
-	payload.Π1 = &crypto.SchnorrZKP{
+	payload.PI1 = &crypto.SchnorrZKP{
 		V: crypto.B64DecodeBytes(aux.PI1_V),
 		R: crypto.B64DecodeBigInt(aux.PI1_R),
 	}
 
-	payload.Π2 = &crypto.SchnorrZKP{
+	payload.PI2 = &crypto.SchnorrZKP{
 		V: crypto.B64DecodeBytes(aux.PI2_V),
 		R: crypto.B64DecodeBigInt(aux.PI2_R),
 	}
@@ -152,9 +152,9 @@ func (payload *ClientAuthValidateRequestPayload) Marshal() ([]byte, error) {
 		R           string `json:"R"`
 	}{
 		ClientKCTag: crypto.B64Encode(payload.ClientKCTag),
-		Alpha:       crypto.B64Encode(payload.α),
-		PIAlpha_V:   crypto.B64Encode(payload.Πα.V),
-		PIAlpha_R:   crypto.B64Encode(payload.Πα.R),
+		Alpha:       crypto.B64Encode(payload.Alpha),
+		PIAlpha_V:   crypto.B64Encode(payload.PIAlpha.V),
+		PIAlpha_R:   crypto.B64Encode(payload.PIAlpha.R),
 		R:           crypto.B64Encode(payload.r),
 	})
 }
@@ -173,9 +173,9 @@ func (payload *ClientAuthValidateRequestPayload) Unmarshal(data []byte) error {
 	}
 
 	payload.ClientKCTag = crypto.B64DecodeBigInt(aux.ClientKCTag)
-	payload.α = crypto.B64DecodeBytes(aux.Alpha)
+	payload.Alpha = crypto.B64DecodeBytes(aux.Alpha)
 
-	payload.Πα = &crypto.SchnorrZKP{
+	payload.PIAlpha = &crypto.SchnorrZKP{
 		V: crypto.B64DecodeBytes(aux.PIAlpha_V),
 		R: crypto.B64DecodeBigInt(aux.PIAlpha_R),
 	}
@@ -230,8 +230,8 @@ func (payload *RegistrationResponsePayload) Marshal() ([]byte, error) {
 		PI3_R string `json:"PI3_R"`
 	}{
 		X3:    crypto.B64Encode(payload.X3),
-		PI3_V: crypto.B64Encode(payload.Π3.V),
-		PI3_R: crypto.B64Encode(payload.Π3.R),
+		PI3_V: crypto.B64Encode(payload.PI3.V),
+		PI3_R: crypto.B64Encode(payload.PI3.R),
 	})
 }
 
@@ -248,7 +248,7 @@ func (payload *RegistrationResponsePayload) Unmarshal(data []byte) error {
 
 	payload.X3 = crypto.B64DecodeBytes(aux.X3)
 
-	payload.Π3 = &crypto.SchnorrZKP{
+	payload.PI3 = &crypto.SchnorrZKP{
 		V: crypto.B64DecodeBytes(aux.PI3_V),
 		R: crypto.B64DecodeBigInt(aux.PI3_R),
 	}
@@ -270,13 +270,13 @@ func (payload *ServerAuthInitResponsePayload) Marshal() ([]byte, error) {
 	}{
 		X3:       crypto.B64Encode(payload.X3),
 		X4:       crypto.B64Encode(payload.X4),
-		Pi3_V:    crypto.B64Encode(payload.Π3.V),
-		Pi3_R:    crypto.B64Encode(payload.Π3.R),
-		Pi4_V:    crypto.B64Encode(payload.Π4.V),
-		Pi4_R:    crypto.B64Encode(payload.Π4.R),
-		Beta:     crypto.B64Encode(payload.B),
-		PIBeta_V: crypto.B64Encode(payload.Πβ.V),
-		PIBeta_R: crypto.B64Encode(payload.Πβ.R),
+		Pi3_V:    crypto.B64Encode(payload.PI3.V),
+		Pi3_R:    crypto.B64Encode(payload.PI3.R),
+		Pi4_V:    crypto.B64Encode(payload.PI4.V),
+		Pi4_R:    crypto.B64Encode(payload.PI4.R),
+		Beta:     crypto.B64Encode(payload.Beta),
+		PIBeta_V: crypto.B64Encode(payload.PIBeta.V),
+		PIBeta_R: crypto.B64Encode(payload.PIBeta.R),
 	})
 }
 
@@ -300,19 +300,19 @@ func (payload *ServerAuthInitResponsePayload) Unmarshal(data []byte) error {
 	payload.X3 = crypto.B64DecodeBytes(aux.X3)
 	payload.X4 = crypto.B64DecodeBytes(aux.X4)
 
-	payload.Π3 = &crypto.SchnorrZKP{
+	payload.PI3 = &crypto.SchnorrZKP{
 		V: crypto.B64DecodeBytes(aux.Pi3_V),
 		R: crypto.B64DecodeBigInt(aux.Pi3_R),
 	}
 
-	payload.Π4 = &crypto.SchnorrZKP{
+	payload.PI4 = &crypto.SchnorrZKP{
 		V: crypto.B64DecodeBytes(aux.Pi4_V),
 		R: crypto.B64DecodeBigInt(aux.Pi4_R),
 	}
 
-	payload.B = crypto.B64DecodeBytes(aux.Beta)
+	payload.Beta = crypto.B64DecodeBytes(aux.Beta)
 
-	payload.Πβ = &crypto.SchnorrZKP{
+	payload.PIBeta = &crypto.SchnorrZKP{
 		V: crypto.B64DecodeBytes(aux.PIBeta_V),
 		R: crypto.B64DecodeBigInt(aux.PIBeta_R),
 	}
@@ -328,7 +328,7 @@ func (payload *ServerAuthInitResponse) Marshal() ([]byte, error) {
 	}{
 		Payload: payload.Payload,
 		x4:      crypto.B64Encode(payload.x4),
-		GBeta:   crypto.B64Encode(payload.Gβ),
+		GBeta:   crypto.B64Encode(payload.GBeta),
 	})
 }
 
@@ -345,7 +345,7 @@ func (payload *ServerAuthInitResponse) Unmarshal(data []byte) error {
 
 	payload.Payload = aux.Payload
 	payload.x4 = crypto.B64DecodeBigInt(aux.x4)
-	payload.Gβ = crypto.B64DecodeBytes(aux.GBeta)
+	payload.GBeta = crypto.B64DecodeBytes(aux.GBeta)
 
 	return nil
 }

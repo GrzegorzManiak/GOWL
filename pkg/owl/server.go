@@ -37,11 +37,11 @@ func ServerInit(
 func (server *Server) RegisterUser() *RegistrationResponse {
 	x3 := crypto.GenerateKey(server.CurveParams.N)
 	X3 := crypto.MultiplyG(server.Curve, x3)
-	Π3 := crypto.GenerateZKP(server.Curve, server.CurveParams.N, x3, X3, server.ServerName)
+	PI3 := crypto.GenerateZKP(server.Curve, server.CurveParams.N, x3, X3, server.ServerName)
 
 	payload := &RegistrationResponsePayload{
-		X3: X3,
-		Π3: Π3,
+		X3:  X3,
+		PI3: PI3,
 	}
 
 	return &RegistrationResponse{
@@ -56,12 +56,12 @@ func (server *Server) AuthInit(
 	G := crypto.GetG(server.Curve)
 	curve := server.Curve
 
-	if crypto.VerifyZKP(server.Curve, G, clientInit.X1, *clientInit.Π1, server.UserIdentifier) == false {
-		return nil, errors.New("ZKP Verification Failed for Π1")
+	if crypto.VerifyZKP(server.Curve, G, clientInit.X1, *clientInit.PI1, server.UserIdentifier) == false {
+		return nil, errors.New("ZKP Verification Failed for PI1")
 	}
 
-	if crypto.VerifyZKP(server.Curve, G, clientInit.X2, *clientInit.Π2, server.UserIdentifier) == false {
-		return nil, errors.New("ZKP Verification Failed for Π2")
+	if crypto.VerifyZKP(server.Curve, G, clientInit.X2, *clientInit.PI2, server.UserIdentifier) == false {
+		return nil, errors.New("ZKP Verification Failed for PI2")
 	}
 
 	if server.UserIdentifier == server.ServerName {
@@ -70,25 +70,25 @@ func (server *Server) AuthInit(
 
 	x4 := crypto.GenerateKey(server.CurveParams.N)
 	X4 := crypto.MultiplyG(curve, x4)
-	Π4 := crypto.GenerateZKP(curve, server.CurveParams.N, x4, X4, server.ServerName)
-	Gβ := crypto.AddPoints(curve, crypto.AddPoints(curve, clientInit.X1, clientInit.X2), serverRegistration.Payload.X3)
-	x4Pi := crypto.ModuloN(crypto.Multiply(x4, server.UserRegistration.π), server.CurveParams.N)
-	β := crypto.MultiplyPoint(curve, &Gβ, x4Pi)
-	Πβ := crypto.GenerateZKPGProvided(curve, Gβ, server.CurveParams.N, x4Pi, β, server.ServerName)
+	PI4 := crypto.GenerateZKP(curve, server.CurveParams.N, x4, X4, server.ServerName)
+	GBeta := crypto.AddPoints(curve, crypto.AddPoints(curve, clientInit.X1, clientInit.X2), serverRegistration.Payload.X3)
+	x4Pi := crypto.ModuloN(crypto.Multiply(x4, server.UserRegistration.PI), server.CurveParams.N)
+	β := crypto.MultiplyPoint(curve, &GBeta, x4Pi)
+	PIBeta := crypto.GenerateZKPGProvided(curve, GBeta, server.CurveParams.N, x4Pi, β, server.ServerName)
 
 	payload := &ServerAuthInitResponsePayload{
-		X3: serverRegistration.Payload.X3,
-		X4: X4,
-		Π3: serverRegistration.Payload.Π3,
-		Π4: Π4,
-		B:  β,
-		Πβ: Πβ,
+		X3:     serverRegistration.Payload.X3,
+		X4:     X4,
+		PI3:    serverRegistration.Payload.PI3,
+		PI4:    PI4,
+		Beta:   β,
+		PIBeta: PIBeta,
 	}
 
 	return &ServerAuthInitResponse{
 		Payload: payload,
 		x4:      x4,
-		Gβ:      Gβ,
+		GBeta:   GBeta,
 	}, nil
 }
 
@@ -101,14 +101,14 @@ func (server *Server) AuthValidate(
 	Gα := crypto.AddPoints(curve, clientInit.X1, serverInit.Payload.X3)
 	Gα = crypto.AddPoints(curve, Gα, serverInit.Payload.X4)
 
-	if crypto.VerifyZKP(curve, Gα, clientValidate.α, *clientValidate.Πα, server.UserIdentifier) == false {
-		return nil, errors.New("ZKP Verification Failed for Πα")
+	if crypto.VerifyZKP(curve, Gα, clientValidate.Alpha, *clientValidate.PIAlpha, server.UserIdentifier) == false {
+		return nil, errors.New("ZKP Verification Failed for PIAlpha")
 	}
 
-	x4π := crypto.Multiply(serverInit.x4, server.UserRegistration.π)
+	x4π := crypto.Multiply(serverInit.x4, server.UserRegistration.PI)
 	X2x4π := crypto.MultiplyPoint(curve, &clientInit.X2, crypto.ModuloN(x4π, server.CurveParams.N))
 
-	rawServerKey := crypto.SubtractPoints(server.Curve, clientValidate.α, X2x4π)
+	rawServerKey := crypto.SubtractPoints(server.Curve, clientValidate.Alpha, X2x4π)
 	rawServerKey = crypto.MultiplyPoint(server.Curve, &rawServerKey, serverInit.x4)
 	serverSessionKey := crypto.Hash(rawServerKey, SessionKey)
 	serverKCKey := crypto.Hash(rawServerKey, ConfirmationKey)
@@ -117,12 +117,12 @@ func (server *Server) AuthValidate(
 		rawServerKey,
 		server.UserIdentifier,
 		clientInit.X1, clientInit.X2,
-		clientInit.Π1, clientInit.Π2,
+		clientInit.PI1, clientInit.PI2,
 		server.ServerName,
 		serverInit.Payload.X3, serverInit.Payload.X4,
-		serverInit.Payload.Π3, serverInit.Payload.Π4,
-		serverInit.Payload.B, serverInit.Payload.Πβ,
-		clientValidate.α, clientValidate.Πα,
+		serverInit.Payload.PI3, serverInit.Payload.PI4,
+		serverInit.Payload.Beta, serverInit.Payload.PIBeta,
+		clientValidate.Alpha, clientValidate.PIAlpha,
 	)
 
 	hServer = crypto.ModuloN(hServer, server.CurveParams.N)

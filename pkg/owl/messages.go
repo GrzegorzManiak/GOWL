@@ -10,9 +10,9 @@ import (
 //
 
 type RegistrationRequestPayload struct {
-	U string
-	π *big.Int
-	T []byte
+	U  string
+	PI *big.Int
+	T  []byte
 }
 
 type RegistrationRequest struct {
@@ -21,11 +21,11 @@ type RegistrationRequest struct {
 }
 
 type ClientAuthInitRequestPayload struct {
-	U  string
-	X1 []byte
-	X2 []byte
-	Π1 *crypto.SchnorrZKP
-	Π2 *crypto.SchnorrZKP
+	U   string
+	X1  []byte
+	X2  []byte
+	PI1 *crypto.SchnorrZKP
+	PI2 *crypto.SchnorrZKP
 }
 
 type ClientAuthInitRequest struct {
@@ -36,8 +36,8 @@ type ClientAuthInitRequest struct {
 
 type ClientAuthValidateRequestPayload struct {
 	ClientKCTag *big.Int
-	α           []byte
-	Πα          *crypto.SchnorrZKP
+	Alpha       []byte
+	PIAlpha     *crypto.SchnorrZKP
 	r           *big.Int
 }
 
@@ -54,8 +54,8 @@ type ClientAuthValidateRequest struct {
 //
 
 type RegistrationResponsePayload struct {
-	X3 []byte
-	Π3 *crypto.SchnorrZKP
+	X3  []byte
+	PI3 *crypto.SchnorrZKP
 }
 
 type RegistrationResponse struct {
@@ -63,18 +63,18 @@ type RegistrationResponse struct {
 }
 
 type ServerAuthInitResponsePayload struct {
-	X3 []byte
-	X4 []byte
-	Π3 *crypto.SchnorrZKP
-	Π4 *crypto.SchnorrZKP
-	B  []byte
-	Πβ *crypto.SchnorrZKP
+	X3     []byte
+	X4     []byte
+	PI3    *crypto.SchnorrZKP
+	PI4    *crypto.SchnorrZKP
+	Beta   []byte
+	PIBeta *crypto.SchnorrZKP
 }
 
 type ServerAuthInitResponse struct {
 	Payload *ServerAuthInitResponsePayload
 	x4      *big.Int
-	Gβ      []byte
+	GBeta   []byte
 }
 
 type ServerAuthValidateResponsePayload struct {
