@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+		"target": "ESNext",
+		"module": "esnext",
+		"lib": [
+			"ESNext",
+			"dom"
+		],
+		"declaration": true,
+		"noImplicitAny": true,
+		"removeComments": true,
+		"esModuleInterop": true,
+		"isolatedModules": false,
+		"sourceMap": true,
+		"declarationDir": ".dist",
+		"allowJs": false,
+		"moduleResolution": "node",
+		"outDir": ".dist",
+		"strict": true,
+	}
+}

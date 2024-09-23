@@ -30,8 +30,11 @@ func main() {
 	serverRegistration := server.RegisterUser()
 
 	// -- Auth Init
+
+	// >>>>
 	clientInit := client.AuthInit()
 
+	// <<<<
 	serverInit, err := server.AuthInit(serverRegistration, clientInit.Payload)
 	if err != nil {
 		fmt.Println(err)
@@ -39,12 +42,14 @@ func main() {
 	}
 
 	// -- Auth Validate
+	// >>>>
 	clientValidate, err := client.AuthValidate(clientInit, serverInit.Payload)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
+	// <<<<
 	serverValidate, err := server.AuthValidate(clientInit.Payload, clientValidate.Payload, serverInit)
 	if err != nil {
 		fmt.Println(err)

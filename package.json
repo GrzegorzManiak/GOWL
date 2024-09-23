@@ -1,0 +1,14 @@
+{
+  "name": "gowl-client-lib",
+  "version": "1.0.0",
+  "description": "The client library for GOWL.",
+  "main": ".dist/bundle.js",
+  "types": ".dist/index.d.ts",
+  "author": "Grzegorz Maniak",
+  "devDependencies": {
+    "typescript": "^5.6.2"
+  },
+  "dependencies": {
+    "@noble/curves": "^1.6.0"
+  }
+}
