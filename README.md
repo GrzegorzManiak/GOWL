@@ -12,7 +12,11 @@ Yes, it works. I have tested it with the Java implementation provided by the aut
 ## Why GO?
 I wanted to learn Go and I thought that implementing the OWL aPake protocol would be a good way to learn Go.
 
-## How to use it?
+# How to use it?
+
+## GO Server
+
+> Note: The Go library implements both the client and the server. The server component is only used to test the client component.
 
 Each function returns a struct that contains a `payload`, this payload is the **Only Data** that should be sent to the other party.
 
@@ -75,6 +79,80 @@ if err != nil {
 fmt.Println(err)
 return
 }
+```
+
+## WEB (TS) Client
+
+> There is **NO** server component in the web client. The server component is only in the Go implementation.
+> If you want a end-to-end implementation in TypeScript, you can use [this](https://github.com/henry50/owl-ts) implementation.
+
+I have also implemented the OWL aPAKE client in TypeScript. You can find it in the `web` directory.
+A simple exchange between the Go server and the TypeScript client is shown below.
+
+```typescript
+//
+// -- Register
+//
+
+let client = new Client('username', 'password', 'server', SupportedCurves.P256);
+const register = await client.Register();
+
+const sendRegistrationRequest = await fetch(registerURL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ...register, TOS: true })
+});
+
+if (!sendRegistrationRequest.ok) {
+    const text = await sendRegistrationRequest.text();
+    console.error(text);
+    throw new Error('Failed to register');
+}
+
+
+
+//
+// -- Login (Init)
+//
+
+client = new Client('username', 'password', 'server', SupportedCurves.P256);
+const authInit = await client.AuthInit();
+
+const sendAuthInitRequest = await fetch(loginInitURL, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(authInit)
+});
+
+if (!sendAuthInitRequest.ok) {
+    const text = await sendAuthInitRequest.text();
+    console.error(text);
+    throw new Error('Failed to authenticate (Init)');
+}
+
+const authInitResponse = await sendAuthInitRequest.json();
+
+//
+// -- Login (Verify)
+//
+
+const authVerify = await client.AuthVerify(authInitResponse);
+const sendAuthVerifyRequest = await fetch(loginVerifyURL, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(authVerify)
+});
+
+if (!sendAuthVerifyRequest.ok) {
+    const text = await sendAuthVerifyRequest.text();
+    console.error(text);
+    throw new Error('Failed to authenticate (Verify)');
+}
+
+const authVerifyResponse = await sendAuthVerifyRequest.json();
+
+// -- Validate servers KCTag
+await client.ValidateServer(authVerifyResponse);
 ```
 
 ## Resources

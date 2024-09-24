@@ -1,5 +1,9 @@
 import { ClientAuthInit, ClientAuthVerify, RegisterOutput, ServerAuthInit, ServerAuthVerify } from "./dto";
-import { BigIntFromBase64, CompareTo, EncodeToBase64, GenerateKey, GetCurve, GetG, Hash, HMac, ModuloN, PointFromBase64 } from "./ops";
+import { GetCurve, GetG } from "./ecc_ops";
+import { Hash } from "./hash";
+import { HMac } from "./hmac";
+import { BigIntFromBase64, EncodeToBase64, PointFromBase64 } from "./marshaler";
+import { CompareTo, GenerateKey, ModuloN } from "./ops";
 import { GenerateZKPGProvided, VerifyZKP } from "./schnorr";
 import { Keys, KeyTags, SchnorrZKP, SupportedCurves } from "./types";
 import { ProjPointType } from "@noble/curves/abstract/weierstrass";

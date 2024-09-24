@@ -1,4 +1,6 @@
-import { CalculateCofactor, CompareTo, GenerateKey, GetCurve, Hash, ModuloN } from "./ops";
+import { CalculateCofactor, GetCurve } from "./ecc_ops";
+import { Hash } from "./hash";
+import { CompareTo, GenerateKey, ModuloN } from "./ops";
 import { SchnorrZKP, SupportedCurves } from "./types";
 import { ProjPointType } from "@noble/curves/abstract/weierstrass";
 

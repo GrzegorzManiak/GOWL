@@ -1,38 +1,7 @@
-import { ProjPointType } from "@noble/curves/abstract/weierstrass";
-import { bytesToHex, bytesToNumberBE, concatBytes } from "@noble/curves/abstract/utils";
-import { CurveMap, SchnorrZKP, SupportedCurves } from "./types";
-
-function GetCurve(curve: SupportedCurves) {
-    const ChooseCurve = CurveMap[curve];
-    if (!ChooseCurve) throw new Error('Invalid curve');
-    return ChooseCurve;
-}
-
-function BigIntToByteArray(int: BigInt): Uint8Array {
-    let hexString = int.toString(16);
-    if (hexString.length % 2) hexString = '0' + hexString;
-    const byteArray = new Uint8Array(hexString.length / 2);
-    for (let i = 0; i < byteArray.length; i++) byteArray[i] = parseInt(hexString.substr(i * 2, 2), 16);
-    return byteArray;
-}
-
-function EncodeToBase64(data: Uint8Array | BigInt): string {
-    let bytes;
-    if (data instanceof BigInt || typeof data == 'bigint') bytes = BigIntToByteArray(data);
-    else if (data instanceof Uint8Array) bytes = data;
-    else throw new Error('Invalid type passed to encodeToBase64');
-    return btoa(String.fromCharCode(...bytes));
-}
-
-function BigIntFromBase64(base64: string): bigint {
-    const bytes = new Uint8Array(atob(base64).split('').map(c => c.charCodeAt(0)));
-    return bytesToNumberBE(bytes);
-}
-
-function PointFromBase64(curve: SupportedCurves, base64: string): ProjPointType<bigint> {
-    const bytes = new Uint8Array(atob(base64).split('').map(c => c.charCodeAt(0)));
-    return GetCurve(curve).ProjectivePoint.fromHex(bytesToHex(bytes));
-}
+import { bytesToNumberBE, concatBytes } from "@noble/curves/abstract/utils";
+import { SchnorrZKP, SupportedCurves } from "./types";
+import { BigIntToByteArray } from "./marshaler";
+import { GetCurve } from "./ecc_ops";
 
 function ModuloN(x: bigint, n: bigint) {
     return ((x % n) + n) % n;
@@ -91,52 +60,10 @@ function ToBytes(data: Uint8Array | bigint | string | SchnorrZKP): Uint8Array {
     throw new Error('Invalid type passed to toBytes');
 }
 
-async function Hash(...args: Array<Uint8Array | bigint | string | SchnorrZKP>): Promise<bigint> {
-    const bytes = concatBytes(...args.map(ToBytes));
-    const hash = await crypto.subtle.digest('SHA-256', bytes);
-    return bytesToNumberBE(new Uint8Array(hash));
-};
-
-function GetG(curve: SupportedCurves): ProjPointType<bigint> {
-    const c = GetCurve(curve);
-    return GetCurve(curve).ProjectivePoint.fromAffine({ x: c.CURVE.Gx, y: c.CURVE.Gy });
-}
-
 function CompareTo(a: bigint, b: bigint): number {
     if (a < b) return -1;
     if (a > b) return 1;
     return 0;
-}
-
-function CalculateCofactor(curve: SupportedCurves): bigint {
-    return GetCurve(curve).CURVE.h;
-}
-
-async function HMac(
-    key: bigint,
-    messageString: string,
-    senderID: string,
-    receiverID: string,
-    senderKey1: Uint8Array,
-    senderKey2: Uint8Array,
-    receiverKey1: Uint8Array,
-    receiverKey2: Uint8Array
-): Promise<bigint> {
-    const keyBytes = BigIntToByteArray(key);
-    const mac = await crypto.subtle.importKey('raw', keyBytes, { name: "HMAC", hash: "SHA-256" }, false, ['sign']);
-    
-    const data = [
-        new TextEncoder().encode(messageString),
-        new TextEncoder().encode(senderID),
-        new TextEncoder().encode(receiverID),
-        senderKey1,
-        senderKey2,
-        receiverKey1,
-        receiverKey2
-    ]
-
-    const signature = await crypto.subtle.sign('HMAC', mac, concatBytes(...data));
-    return BytesToBigInt(new Uint8Array(signature));
 }
 
 function BytesToBigInt(bytes: Uint8Array): bigint {
@@ -146,20 +73,11 @@ function BytesToBigInt(bytes: Uint8Array): bigint {
 
 
 export {
-    BigIntFromBase64,
-    BigIntToByteArray,
-    GetCurve,
-    EncodeToBase64,
-    PointFromBase64,
     ModuloN,
     HighEntropyRandom,
     GenerateKey,
     IntTo4Bytes,
     ToBytes,
-    GetG,
-    Hash,
     CompareTo,
-    HMac,
     BytesToBigInt,
-    CalculateCofactor
 }
