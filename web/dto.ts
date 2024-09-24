@@ -27,6 +27,7 @@ type ServerAuthInit = {
 }
 
 type ClientAuthVerify = {
+    ClientKCTag: string;
     Alpha: string;
     PIAlpha_V: string;
     PIAlpha_R: string;

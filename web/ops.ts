@@ -1,6 +1,6 @@
 import { ProjPointType } from "@noble/curves/abstract/weierstrass";
 import { bytesToHex, bytesToNumberBE, concatBytes } from "@noble/curves/abstract/utils";
-import { CurveMap, SupportedCurves } from "./types";
+import { CurveMap, SchnorrZKP, SupportedCurves } from "./types";
 
 function GetCurve(curve: SupportedCurves) {
     const ChooseCurve = CurveMap[curve];
@@ -60,7 +60,7 @@ function IntTo4Bytes(i: number): Uint8Array {
     return new Uint8Array([i >> 24, i >> 16, i >> 8, i]);
 }
 
-function ToBytes(data: Uint8Array | bigint | string): Uint8Array {
+function ToBytes(data: Uint8Array | bigint | string | SchnorrZKP): Uint8Array {
     if (data instanceof Uint8Array) {
         const len = IntTo4Bytes(data.length);
         return concatBytes(len, data);
@@ -80,10 +80,18 @@ function ToBytes(data: Uint8Array | bigint | string): Uint8Array {
         return concatBytes(len, bytes);
     } 
 
+    else if (Object.keys(data).length === 2 && 'V' in data && 'r' in data) {
+        const vBytes = data.V.toRawBytes();
+        const rBytes = BigIntToByteArray(data.r);
+        const vLen = IntTo4Bytes(vBytes.length);
+        const rLen = IntTo4Bytes(rBytes.length);
+        return concatBytes(vLen, vBytes, rLen, rBytes);
+    }
+
     throw new Error('Invalid type passed to toBytes');
 }
 
-async function Hash(...args: Array<Uint8Array | bigint | string>): Promise<bigint> {
+async function Hash(...args: Array<Uint8Array | bigint | string | SchnorrZKP>): Promise<bigint> {
     const bytes = concatBytes(...args.map(ToBytes));
     const hash = await crypto.subtle.digest('SHA-256', bytes);
     return bytesToNumberBE(new Uint8Array(hash));
@@ -104,6 +112,39 @@ function CalculateCofactor(curve: SupportedCurves): bigint {
     return GetCurve(curve).CURVE.h;
 }
 
+async function HMac(
+    key: bigint,
+    messageString: string,
+    senderID: string,
+    receiverID: string,
+    senderKey1: Uint8Array,
+    senderKey2: Uint8Array,
+    receiverKey1: Uint8Array,
+    receiverKey2: Uint8Array
+): Promise<bigint> {
+    const keyBytes = BigIntToByteArray(key);
+    const mac = await crypto.subtle.importKey('raw', keyBytes, { name: "HMAC", hash: "SHA-256" }, false, ['sign']);
+    
+    const data = [
+        new TextEncoder().encode(messageString),
+        new TextEncoder().encode(senderID),
+        new TextEncoder().encode(receiverID),
+        senderKey1,
+        senderKey2,
+        receiverKey1,
+        receiverKey2
+    ]
+    
+    const signature = await crypto.subtle.sign('HMAC', mac, concatBytes(...data));
+    return bytesToBigInt(new Uint8Array(signature));
+}
+
+function bytesToBigInt(bytes: Uint8Array): bigint {
+    let hex = Array.from(bytes).map(byte => byte.toString(16).padStart(2, '0')).join('');
+    return BigInt('0x' + hex);
+}
+
+
 export {
     BigIntFromBase64,
     BigIntToByteArray,
@@ -118,5 +159,6 @@ export {
     GetG,
     Hash,
     CompareTo,
+    HMac,
     CalculateCofactor
 }

@@ -1,7 +1,7 @@
-import { ClientAuthInit, RegisterOutput, ServerAuthInit } from "./dto";
-import { BigIntFromBase64, EncodeToBase64, GenerateKey, GetCurve, GetG, Hash, ModuloN, PointFromBase64 } from "./ops";
+import { ClientAuthInit, ClientAuthVerify, RegisterOutput, ServerAuthInit } from "./dto";
+import { BigIntFromBase64, EncodeToBase64, GenerateKey, GetCurve, GetG, Hash, HMac, ModuloN, PointFromBase64 } from "./ops";
 import { GenerateZKPGProvided, VerifyZKP } from "./schnorr";
-import { SchnorrZKP, SupportedCurves } from "./types";
+import { Keys, KeyTags, SchnorrZKP, SupportedCurves } from "./types";
 import { ProjPointType } from "@noble/curves/abstract/weierstrass";
 
 class Client {
@@ -75,7 +75,7 @@ class Client {
         }
     }
 
-    public async AuthVerify(serverInit: ServerAuthInit): Promise<void> {
+    public async AuthVerify(serverInit: ServerAuthInit): Promise<ClientAuthVerify> {
         if (!this.hasInit) throw new Error('AuthInit must be called before AuthVerify');
         if (!this.X1 || !this.X2 || !this.PI1 || !this.PI2) throw new Error('AuthInit must be called before AuthVerify');
 
@@ -95,7 +95,52 @@ class Client {
             const GBeta = this.X1.add(this.X2).add(X3);
             if (! await VerifyZKP(this.curveKey, GBeta, Beta, PIBeta, this.server)) throw new Error('Failed to authenticate PIBeta (Verify)');
 
-            console.log('PI3 verified');
+            const GAlpha = this.X1.add(X3).add(X4);
+            const x2pi = ModuloN(this.x2 * this.pi, this.N);
+            const Alpha = GAlpha.multiply(x2pi);
+            const PIAlpha = await GenerateZKPGProvided(this.curveKey, GAlpha, this.N, x2pi, Alpha, this.userName);
+
+            const rawClientKey = Beta.subtract(X4.multiply(x2pi));
+            rawClientKey.multiply(this.x2);
+
+            const clientSessionKey = await Hash(rawClientKey.toRawBytes(), Keys.Session);
+            const clientKCKey = await Hash(rawClientKey.toRawBytes(), Keys.Confirmation);
+
+            const hTranscript = await Hash(
+                rawClientKey.toRawBytes(),
+                this.userName,
+                this.X1.toRawBytes(), this.X2.toRawBytes(),
+                this.PI1, this.PI2,
+                this.server,
+                X3.toRawBytes(), X4.toRawBytes(),
+                PI3, PI4,
+                Beta.toRawBytes(), PIBeta,
+                Alpha.toRawBytes(), PIAlpha
+            );
+
+            let rValue = this.x1 - (this.t * hTranscript);
+            rValue = ModuloN(rValue, this.N);
+
+            const clientKCTag = await HMac(
+                clientKCKey, 
+                KeyTags.ClientKC,
+                this.userName,
+                this.server,
+                this.X1.toRawBytes(),
+                this.X2.toRawBytes(),
+                X3.toRawBytes(),
+                X4.toRawBytes()
+            );
+
+            console.log(clientSessionKey)
+
+            return {
+                Alpha: EncodeToBase64(Alpha.toRawBytes()),
+                PIAlpha_V: EncodeToBase64(PIAlpha.V.toRawBytes()),
+                PIAlpha_R: EncodeToBase64(PIAlpha.r),
+                R: EncodeToBase64(rValue),
+                ClientKCTag: EncodeToBase64(clientKCTag)
+            };
         }
 
         catch (e) {

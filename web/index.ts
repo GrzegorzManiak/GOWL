@@ -61,3 +61,14 @@ const authInitResponse = await sendAuthInitRequest.json();
 
 const authVerify = await client.AuthVerify(authInitResponse);
 console.log(authVerify)
+const sendAuthVerifyRequest = await fetch(loginVerifyURL, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(authVerify)
+});
+
+if (!sendAuthVerifyRequest.ok) {
+    const text = await sendAuthVerifyRequest.text();
+    console.error(text);
+    throw new Error('Failed to authenticate (Verify)');
+}
