@@ -24,6 +24,16 @@ function EncodeToBase64(data: Uint8Array | BigInt): string {
     return btoa(String.fromCharCode(...bytes));
 }
 
+function BigIntFromBase64(base64: string): bigint {
+    const bytes = new Uint8Array(atob(base64).split('').map(c => c.charCodeAt(0)));
+    return bytesToNumberBE(bytes);
+}
+
+function PointFromBase64(curve: SupportedCurves, base64: string): ProjPointType<bigint> {
+    const bytes = new Uint8Array(atob(base64).split('').map(c => c.charCodeAt(0)));
+    return GetCurve(curve).ProjectivePoint.fromHex(bytesToHex(bytes));
+}
+
 function ModuloN(x: bigint, n: bigint) {
     return ((x % n) + n) % n;
 }
@@ -85,8 +95,11 @@ function GetG(curve: SupportedCurves): ProjPointType<bigint> {
 }
 
 export {
+    BigIntFromBase64,
+    BigIntToByteArray,
     GetCurve,
     EncodeToBase64,
+    PointFromBase64,
     ModuloN,
     HighEntropyRandom,
     GenerateKey,
