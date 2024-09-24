@@ -1,6 +1,6 @@
-import { BigIntToByteArray } from "./marshaler";
-import { BytesToBigInt } from "./ops";
-import { concatBytes } from "@noble/curves/abstract/utils";
+import { BigIntToByteArray } from './marshaler';
+import { BytesToBigInt } from './ops';
+import { concatBytes } from '@noble/curves/abstract/utils';
 
 async function HMac(
     key: bigint,
@@ -13,7 +13,7 @@ async function HMac(
     receiverKey2: Uint8Array
 ): Promise<bigint> {
     const keyBytes = BigIntToByteArray(key);
-    const mac = await crypto.subtle.importKey('raw', keyBytes, { name: "HMAC", hash: "SHA-256" }, false, ['sign']);
+    const mac = await crypto.subtle.importKey('raw', keyBytes, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
     
     const data = [
         new TextEncoder().encode(messageString),

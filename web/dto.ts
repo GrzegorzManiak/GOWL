@@ -1,5 +1,5 @@
-import { ProjPointType } from "@noble/curves/abstract/weierstrass";
-import { SchnorrZKP } from "./types";
+import { ProjPointType } from '@noble/curves/abstract/weierstrass';
+import { SchnorrZKP } from './types';
 
 type RegisterOutput = {
     User: string;

@@ -1,12 +1,12 @@
-import { ClientAuthInit, ClientAuthInitPrivate, ClientAuthVerify, ClientAuthVerifyPrivate, RegisterOutput, ServerAuthInit, ServerAuthVerify } from "./dto";
-import { GetCurve, GetG } from "./ecc_ops";
-import { Hash } from "./hash";
-import { HMac } from "./hmac";
-import { BigIntFromBase64, EncodeToBase64, PointFromBase64 } from "./marshaler";
-import { CompareTo, GenerateKey, ModuloN } from "./ops";
-import { GenerateZKPGProvided, VerifyZKP } from "./schnorr";
-import { Keys, KeyTags, SupportedCurves } from "./types";
-import { ProjPointType } from "@noble/curves/abstract/weierstrass";
+import { ClientAuthInit, ClientAuthInitPrivate, ClientAuthVerify, ClientAuthVerifyPrivate, RegisterOutput, ServerAuthInit, ServerAuthVerify } from './dto';
+import { GetCurve, GetG } from './ecc_ops';
+import { Hash } from './hash';
+import { HMac } from './hmac';
+import { BigIntFromBase64, EncodeToBase64, PointFromBase64 } from './marshaler';
+import { CompareTo, GenerateKey, ModuloN } from './ops';
+import { GenerateZKPGProvided, VerifyZKP } from './schnorr';
+import { Keys, KeyTags, SupportedCurves } from './types';
+import { ProjPointType } from '@noble/curves/abstract/weierstrass';
 
 class Client {
     private userName: string;

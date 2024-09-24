@@ -1,7 +1,7 @@
-import { ProjPointType } from "@noble/curves/abstract/weierstrass";
-import { bytesToHex, bytesToNumberBE } from "@noble/curves/abstract/utils";
-import { SupportedCurves } from "./types";
-import { GetCurve } from "./ecc_ops";
+import { ProjPointType } from '@noble/curves/abstract/weierstrass';
+import { bytesToHex, bytesToNumberBE } from '@noble/curves/abstract/utils';
+import { SupportedCurves } from './types';
+import { GetCurve } from './ecc_ops';
 
 function BigIntToByteArray(int: BigInt): Uint8Array {
     let hexString = int.toString(16);

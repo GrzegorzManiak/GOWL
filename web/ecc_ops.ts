@@ -1,5 +1,5 @@
-import { ProjPointType } from "@noble/curves/abstract/weierstrass";
-import { CurveMap, SupportedCurves } from "./types";
+import { ProjPointType } from '@noble/curves/abstract/weierstrass';
+import { CurveMap, SupportedCurves } from './types';
 
 function GetG(curve: SupportedCurves): ProjPointType<bigint> {
     const c = GetCurve(curve);

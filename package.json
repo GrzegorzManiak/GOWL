@@ -1,8 +1,13 @@
 {
   "name": "gowl-client-lib",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "The client library for GOWL.",
-  "main": "./web/index.ts",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "author": "Grzegorz Maniak <me@Grzegorz.ie> (https://Grzegorz.ie)",
   "bugs": {
     "url": "https://github.com/GrzegorzManiak/gowl",
@@ -12,11 +17,30 @@
     "type": "git",
     "url": "https://github.com/GrzegorzManiak/gowl.git"
   },
+  "scripts": {
+    "build": "tsup"
+  },
   "devDependencies": {
-    "typescript": "^5.6.2",
-    "@types/bun": "^1.1.10"
+    "@types/bun": "^1.1.10",
+    "tsup": "^8.3.0",
+    "typescript": "^5.6.2"
   },
   "dependencies": {
     "@noble/curves": "^1.6.0"
-  }
+  },
+  "keywords": [
+    "gowl",
+    "client",
+    "library",
+    "pake",
+    "password",
+    "apake",
+    "go",
+    "golang",
+    "owl",
+    "schnorr",
+    "zkp",
+    "curve",
+    "ecc"
+  ]
 }

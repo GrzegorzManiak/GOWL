@@ -12,10 +12,10 @@
 		"esModuleInterop": true,
 		"isolatedModules": false,
 		"sourceMap": true,
-		"declarationDir": ".dist",
+		"declarationDir": "./dist",
 		"allowJs": false,
 		"moduleResolution": "node",
-		"outDir": ".dist",
+		"outDir": "./dist",
 		"strict": true,
         "types": [
             "bun"

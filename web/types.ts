@@ -1,7 +1,7 @@
-import { ProjPointType } from "@noble/curves/abstract/weierstrass";
-import { p256 } from "@noble/curves/p256";
-import { p384 } from "@noble/curves/p384";
-import { p521 } from "@noble/curves/p521";
+import { ProjPointType } from '@noble/curves/abstract/weierstrass';
+import { p256 } from '@noble/curves/p256';
+import { p384 } from '@noble/curves/p384';
+import { p521 } from '@noble/curves/p521';
 
 enum SupportedCurves {
     P256 = 256,
