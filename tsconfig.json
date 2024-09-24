@@ -17,5 +17,8 @@
 		"moduleResolution": "node",
 		"outDir": ".dist",
 		"strict": true,
+        "types": [
+            "bun"
+        ]
 	}
 }
