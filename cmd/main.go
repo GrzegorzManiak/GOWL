@@ -3,7 +3,6 @@ package main
 import (
 	"crypto/elliptic"
 	"fmt"
-	"github.com/GrzegorzManiak/GOWL/pkg/crypto"
 	"github.com/GrzegorzManiak/GOWL/pkg/owl"
 )
 
@@ -41,9 +40,6 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-
-	// print beta
-	fmt.Println("Beta: ", crypto.B64Encode(serverInit.Payload.Beta))
 
 	// -- Auth Validate
 	// >>>>

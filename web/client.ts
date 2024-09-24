@@ -100,8 +100,8 @@ class Client {
             const Alpha = GAlpha.multiply(x2pi);
             const PIAlpha = await GenerateZKPGProvided(this.curveKey, GAlpha, this.N, x2pi, Alpha, this.userName);
 
-            const rawClientKey = Beta.subtract(X4.multiply(x2pi));
-            rawClientKey.multiply(this.x2);
+            let rawClientKey = Beta.subtract(X4.multiply(x2pi));
+            rawClientKey = rawClientKey.multiply(this.x2);
 
             const clientSessionKey = await Hash(rawClientKey.toRawBytes(), Keys.Session);
             const clientKCKey = await Hash(rawClientKey.toRawBytes(), Keys.Confirmation);
@@ -132,7 +132,7 @@ class Client {
                 X4.toRawBytes()
             );
 
-            console.log(clientSessionKey)
+            console.log(clientKCKey)
 
             return {
                 Alpha: EncodeToBase64(Alpha.toRawBytes()),

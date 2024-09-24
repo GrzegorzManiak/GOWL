@@ -1,5 +1,7 @@
 import { Client } from './client';
+import { BigIntToByteArray, BytesToBigInt } from './ops';
 import { SupportedCurves } from './types';
+import { bytesToHex, bytesToNumberBE, concatBytes } from "@noble/curves/abstract/utils";
 
 export * from './types';
 export * from './ops';

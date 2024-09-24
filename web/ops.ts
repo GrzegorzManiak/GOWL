@@ -134,12 +134,12 @@ async function HMac(
         receiverKey1,
         receiverKey2
     ]
-    
+
     const signature = await crypto.subtle.sign('HMAC', mac, concatBytes(...data));
-    return bytesToBigInt(new Uint8Array(signature));
+    return BytesToBigInt(new Uint8Array(signature));
 }
 
-function bytesToBigInt(bytes: Uint8Array): bigint {
+function BytesToBigInt(bytes: Uint8Array): bigint {
     let hex = Array.from(bytes).map(byte => byte.toString(16).padStart(2, '0')).join('');
     return BigInt('0x' + hex);
 }
@@ -160,5 +160,6 @@ export {
     Hash,
     CompareTo,
     HMac,
+    BytesToBigInt,
     CalculateCofactor
 }
