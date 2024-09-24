@@ -1,5 +1,5 @@
-import { ClientAuthInit, ClientAuthVerify, RegisterOutput, ServerAuthInit } from "./dto";
-import { BigIntFromBase64, EncodeToBase64, GenerateKey, GetCurve, GetG, Hash, HMac, ModuloN, PointFromBase64 } from "./ops";
+import { ClientAuthInit, ClientAuthVerify, RegisterOutput, ServerAuthInit, ServerAuthVerify } from "./dto";
+import { BigIntFromBase64, CompareTo, EncodeToBase64, GenerateKey, GetCurve, GetG, Hash, HMac, ModuloN, PointFromBase64 } from "./ops";
 import { GenerateZKPGProvided, VerifyZKP } from "./schnorr";
 import { Keys, KeyTags, SchnorrZKP, SupportedCurves } from "./types";
 import { ProjPointType } from "@noble/curves/abstract/weierstrass";
@@ -22,6 +22,10 @@ class Client {
     private X2: ProjPointType<bigint> | undefined;
     private PI1: SchnorrZKP | undefined;
     private PI2: SchnorrZKP | undefined;
+
+    private clientKCKey = 0n;
+    private X3: ProjPointType<bigint> | undefined;
+    private X4: ProjPointType<bigint> | undefined;
     
 
     public constructor(userName: string, password: string, server: string, curve: SupportedCurves) {
@@ -88,7 +92,9 @@ class Client {
                 PointFromBase64(this.curveKey, serverInit.Beta),
                 { V: PointFromBase64(this.curveKey, serverInit.PIBeta_V), r: BigIntFromBase64(serverInit.PIBeta_R) }
             ];
-            
+
+            this.X3 = X3;
+            this.X4 = X4;
             
             if (! await VerifyZKP(this.curveKey, this.G, X3, PI3, this.server)) throw new Error('Failed to authenticate PI3 (Verify)');
             if (! await VerifyZKP(this.curveKey, this.G, X4, PI4, this.server)) throw new Error('Failed to authenticate PI4 (Verify)');
@@ -104,7 +110,7 @@ class Client {
             rawClientKey = rawClientKey.multiply(this.x2);
 
             const clientSessionKey = await Hash(rawClientKey.toRawBytes(), Keys.Session);
-            const clientKCKey = await Hash(rawClientKey.toRawBytes(), Keys.Confirmation);
+            this.clientKCKey = await Hash(rawClientKey.toRawBytes(), Keys.Confirmation);
 
             const hTranscript = await Hash(
                 rawClientKey.toRawBytes(),
@@ -122,7 +128,7 @@ class Client {
             rValue = ModuloN(rValue, this.N);
 
             const clientKCTag = await HMac(
-                clientKCKey, 
+                this.clientKCKey, 
                 KeyTags.ClientKC,
                 this.userName,
                 this.server,
@@ -131,8 +137,6 @@ class Client {
                 X3.toRawBytes(),
                 X4.toRawBytes()
             );
-
-            console.log(clientKCKey)
 
             return {
                 Alpha: EncodeToBase64(Alpha.toRawBytes()),
@@ -146,6 +150,34 @@ class Client {
         catch (e) {
             console.error(e);
             throw new Error('Failed to authenticate (Verify)');
+        }
+    }
+
+    public async ValidateServer(serverVerify: ServerAuthVerify): Promise<void> {
+        if (!this.hasInit) throw new Error('AuthInit must be called before ValidateServer');
+        if (!this.X1 || !this.X2 || !this.PI1 || !this.PI2) throw new Error('AuthInit must be called before ValidateServer');
+        if (!this.X3 || !this.X4) throw new Error('AuthVerify must be called before ValidateServer');
+        if (!this.clientKCKey) throw new Error('AuthVerify must be called before ValidateServer');
+
+        try {
+            const serverKcTag2 = await HMac(
+                this.clientKCKey,
+                KeyTags.ServerKC,
+                this.server,
+                this.userName,
+                this.X3.toRawBytes(),
+                this.X4.toRawBytes(),
+                this.X1.toRawBytes(),
+                this.X2.toRawBytes()
+            );
+
+            const serverKCTagc = BigIntFromBase64(serverVerify.ServerKCTag);
+            if (CompareTo(serverKcTag2, serverKCTagc) !== 0) throw new Error('Failed to validate server (KCTag)');
+        }
+
+        catch (e) {
+            console.error(e);
+            throw new Error('Failed to validate server (KCTag)');
         }
     }
 }

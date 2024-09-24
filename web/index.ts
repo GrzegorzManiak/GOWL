@@ -62,7 +62,6 @@ const authInitResponse = await sendAuthInitRequest.json();
 //
 
 const authVerify = await client.AuthVerify(authInitResponse);
-console.log(authVerify)
 const sendAuthVerifyRequest = await fetch(loginVerifyURL, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
@@ -74,3 +73,9 @@ if (!sendAuthVerifyRequest.ok) {
     console.error(text);
     throw new Error('Failed to authenticate (Verify)');
 }
+
+const authVerifyResponse = await sendAuthVerifyRequest.json();
+console.log(authVerifyResponse);
+
+// -- Validate servers KCTag
+await client.ValidateServer(authVerifyResponse);
