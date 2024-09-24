@@ -34,6 +34,8 @@ class Client {
 
     public async Register(): Promise<RegisterOutput | Error> {
         try {
+            if (!this.userName || !this.password) throw new Error('Invalid user name or password');
+            if (this.userName === this.server) throw new Error('User name cannot be the same as server name');
             const t = ModuloN(await Hash(this.userName, this.password), this.curve.CURVE.n);
             const T = this.G.multiply(t);
             const PI = ModuloN(await Hash(t), this.curve.CURVE.n);
@@ -48,6 +50,9 @@ class Client {
 
     public async AuthInit(): Promise<ClientAuthInit | Error> {
         try {
+            if (!this.userName || !this.password) throw new Error('Invalid user name or password');
+            if (this.userName === this.server) throw new Error('User name cannot be the same as server name');
+            
             const t = ModuloN(await Hash(this.userName, this.password), this.curve.CURVE.n);
             const T = this.G.multiply(t);
             const PI = ModuloN(await Hash(t), this.curve.CURVE.n);
