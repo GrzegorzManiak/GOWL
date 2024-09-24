@@ -60,3 +60,4 @@ const authInitResponse = await sendAuthInitRequest.json();
 //
 
 const authVerify = await client.AuthVerify(authInitResponse);
+console.log(authVerify)

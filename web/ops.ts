@@ -94,6 +94,16 @@ function GetG(curve: SupportedCurves): ProjPointType<bigint> {
     return GetCurve(curve).ProjectivePoint.fromAffine({ x: c.CURVE.Gx, y: c.CURVE.Gy });
 }
 
+function CompareTo(a: bigint, b: bigint): number {
+    if (a < b) return -1;
+    if (a > b) return 1;
+    return 0;
+}
+
+function CalculateCofactor(curve: SupportedCurves): bigint {
+    return GetCurve(curve).CURVE.h;
+}
+
 export {
     BigIntFromBase64,
     BigIntToByteArray,
@@ -106,5 +116,7 @@ export {
     IntTo4Bytes,
     ToBytes,
     GetG,
-    Hash
+    Hash,
+    CompareTo,
+    CalculateCofactor
 }

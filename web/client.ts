@@ -1,6 +1,6 @@
 import { ClientAuthInit, RegisterOutput, ServerAuthInit } from "./dto";
 import { BigIntFromBase64, EncodeToBase64, GenerateKey, GetCurve, GetG, Hash, ModuloN, PointFromBase64 } from "./ops";
-import { GenerateZKPGProvided } from "./schnorr";
+import { GenerateZKPGProvided, VerifyZKP } from "./schnorr";
 import { SchnorrZKP, SupportedCurves } from "./types";
 import { ProjPointType } from "@noble/curves/abstract/weierstrass";
 
@@ -80,7 +80,6 @@ class Client {
         if (!this.X1 || !this.X2 || !this.PI1 || !this.PI2) throw new Error('AuthInit must be called before AuthVerify');
 
         try {
-            console.log('AuthVerify', serverInit);
             const [ X3, X4, PI3, PI4, Beta, PIBeta] = [
                 PointFromBase64(this.curveKey, serverInit.X3), 
                 PointFromBase64(this.curveKey, serverInit.X4),
@@ -89,7 +88,14 @@ class Client {
                 PointFromBase64(this.curveKey, serverInit.Beta),
                 { V: PointFromBase64(this.curveKey, serverInit.PIBeta_V), r: BigIntFromBase64(serverInit.PIBeta_R) }
             ];
+            
+            
+            if (! await VerifyZKP(this.curveKey, this.G, X3, PI3, this.server)) throw new Error('Failed to authenticate PI3 (Verify)');
+            if (! await VerifyZKP(this.curveKey, this.G, X4, PI4, this.server)) throw new Error('Failed to authenticate PI4 (Verify)');
+            const GBeta = this.X1.add(this.X2).add(X3);
+            if (! await VerifyZKP(this.curveKey, GBeta, Beta, PIBeta, this.server)) throw new Error('Failed to authenticate PIBeta (Verify)');
 
+            console.log('PI3 verified');
         }
 
         catch (e) {

@@ -1,4 +1,4 @@
-import { GenerateKey, Hash, ModuloN } from "./ops";
+import { CalculateCofactor, CompareTo, GenerateKey, GetCurve, Hash, ModuloN } from "./ops";
 import { SchnorrZKP, SupportedCurves } from "./types";
 import { ProjPointType } from "@noble/curves/abstract/weierstrass";
 
@@ -19,46 +19,37 @@ async function GenerateZKPGProvided(
     return { V, r };
 };
 
-// func VerifyZKP(
-// 	curve elliptic.Curve,
-// 	generator []byte,
-// 	X []byte,
-// 	zkp SchnorrZKP,
-// 	prover string,
-// ) bool {
-// 	h := Hash(generator, zkp.V, X, prover)
+async function VerifyZKP(
+    curve: SupportedCurves,
+    generator: ProjPointType<bigint>,
+    X: ProjPointType<bigint>,
+    zkp: SchnorrZKP,
+    prover: string
+): Promise<boolean> {
 
-// 	if X == nil || zkp.V == nil || zkp.R == nil {
-// 		return false
-// 	}
+    const h = await Hash(generator.toRawBytes(), zkp.V.toRawBytes(), X.toRawBytes(), prover);
+    if (!X || !zkp.V || !zkp.r) return false;
 
-// 	xX, xY := elliptic.UnmarshalCompressed(curve, X)
-// 	if IsInfinity(xX, xY) {
-// 		return false
-// 	}
+    try { X.assertValidity(); } 
+    catch { return false; }
 
-// 	if xX.Cmp(big.NewInt(0)) == -1 || xX.Cmp(new(big.Int).Sub(curve.Params().N, big.NewInt(1))) == 1 {
-// 		return false
-// 	}
+    const { x: xX, y: yY } = X.toAffine();
+    if (xX === null || yY === null) return false;
 
-// 	if xY.Cmp(big.NewInt(0)) == -1 || xY.Cmp(new(big.Int).Sub(curve.Params().N, big.NewInt(1))) == 1 {
-// 		return false
-// 	}
+    const curveParams = GetCurve(curve);
+    if (CompareTo(xX, BigInt(0)) === -1 || CompareTo(xX, curveParams.CURVE.n - BigInt(1)) === 1) return false;
+    if (CompareTo(yY, BigInt(0)) === -1 || CompareTo(yY, curveParams.CURVE.n - BigInt(1)) === 1) return false;
 
-// 	if !curve.IsOnCurve(xX, xY) {
-// 		return false
-// 	}
+    const xXh = X.multiply(CalculateCofactor(curve));
+    const { x: xXhX, y: xXhY } = xXh.toAffine();
+    if (xXhX === null || xXhY === null) return false;
+    if (xXhX === BigInt(0) && xXhY === BigInt(0)) return false;
 
-// 	xXh := MultiplyPoint(curve, &X, CalculateCofactor(curve))
-// 	xXhX, xXhY := elliptic.UnmarshalCompressed(curve, xXh)
-// 	if IsInfinity(xXhX, xXhY) {
-// 		return false
-// 	}
-
-// 	gRxhmn := AddPoints(curve, MultiplyPoint(curve, &generator, zkp.R), MultiplyPoint(curve, &X, ModuloN(h, curve.Params().N)))
-// 	return PointsEqual(curve, zkp.V, gRxhmn)
-// }
+    const gRxhmn = generator.multiply(zkp.r).add(X.multiply(ModuloN(h, curveParams.CURVE.n)));
+    return zkp.V.equals(gRxhmn);
+}
 
 export {
-    GenerateZKPGProvided
+    GenerateZKPGProvided,
+    VerifyZKP
 }
