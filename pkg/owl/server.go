@@ -87,7 +87,7 @@ func (server *Server) AuthInit(
 
 	return &ServerAuthInitResponse{
 		Payload: payload,
-		x4:      x4,
+		Xx4:     x4,
 		GBeta:   GBeta,
 	}, nil
 }
@@ -105,11 +105,11 @@ func (server *Server) AuthValidate(
 		return nil, errors.New("ZKP Verification Failed for PIAlpha")
 	}
 
-	x4π := crypto.Multiply(serverInit.x4, server.UserRegistration.PI)
+	x4π := crypto.Multiply(serverInit.Xx4, server.UserRegistration.PI)
 	X2x4π := crypto.MultiplyPoint(curve, &clientInit.X2, crypto.ModuloN(x4π, server.CurveParams.N))
 
 	rawServerKey := crypto.SubtractPoints(server.Curve, clientValidate.Alpha, X2x4π)
-	rawServerKey = crypto.MultiplyPoint(server.Curve, &rawServerKey, serverInit.x4)
+	rawServerKey = crypto.MultiplyPoint(server.Curve, &rawServerKey, serverInit.Xx4)
 	serverSessionKey := crypto.Hash(rawServerKey, SessionKey)
 	serverKCKey := crypto.Hash(rawServerKey, ConfirmationKey)
 

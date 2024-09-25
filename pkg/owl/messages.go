@@ -73,7 +73,7 @@ type ServerAuthInitResponsePayload struct {
 
 type ServerAuthInitResponse struct {
 	Payload *ServerAuthInitResponsePayload
-	x4      *big.Int
+	Xx4     *big.Int
 	GBeta   []byte
 }
 

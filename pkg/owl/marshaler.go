@@ -327,7 +327,7 @@ func (payload *ServerAuthInitResponse) Marshal() ([]byte, error) {
 		GBeta   string                         `json:"GBeta"`
 	}{
 		Payload: payload.Payload,
-		x4:      crypto.B64Encode(payload.x4),
+		x4:      crypto.B64Encode(payload.Xx4),
 		GBeta:   crypto.B64Encode(payload.GBeta),
 	})
 }
@@ -344,7 +344,7 @@ func (payload *ServerAuthInitResponse) Unmarshal(data []byte) error {
 	}
 
 	payload.Payload = aux.Payload
-	payload.x4 = crypto.B64DecodeBigInt(aux.x4)
+	payload.Xx4 = crypto.B64DecodeBigInt(aux.x4)
 	payload.GBeta = crypto.B64DecodeBytes(aux.GBeta)
 
 	return nil
