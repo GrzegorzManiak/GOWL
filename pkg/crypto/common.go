@@ -1,23 +1,19 @@
 package crypto
 
 import (
+	"crypto/ecdsa"
+	"crypto/elliptic"
 	"crypto/rand"
 	"encoding/base64"
 	"math/big"
 )
 
-func HighEntropyRandom(min *big.Int, max *big.Int) *big.Int {
-	rangeBigInt := new(big.Int).Sub(max, min)
-	randomBigInt, err := rand.Int(rand.Reader, rangeBigInt)
+func GenerateKey(curve elliptic.Curve) *big.Int {
+	key, err := ecdsa.GenerateKey(curve, rand.Reader)
 	if err != nil {
 		panic(err)
 	}
-	randomBigInt.Add(randomBigInt, min)
-	return randomBigInt
-}
-
-func GenerateKey(n *big.Int) *big.Int {
-	return HighEntropyRandom(big.NewInt(1), new(big.Int).Sub(n, big.NewInt(1)))
+	return new(big.Int).SetBytes(key.D.Bytes())
 }
 
 func ModuloN(x *big.Int, n *big.Int) *big.Int {

@@ -22,15 +22,15 @@ func GenerateZKP(
 }
 
 func GenerateZKPGProvided(
-	generator elliptic.Curve,
+	curve elliptic.Curve,
 	g []byte, // No pointer needed
 	n *big.Int,
 	x *big.Int,
 	X []byte,
 	prover string,
 ) *SchnorrZKP {
-	v := GenerateKey(n)
-	V := MultiplyPoint(generator, &g, v)
+	v := GenerateKey(curve)
+	V := MultiplyPoint(curve, &g, v)
 	h := Hash(g, V, X, prover)
 	r := Multiply(x, h)
 	r = new(big.Int).Sub(v, r)

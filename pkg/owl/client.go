@@ -62,11 +62,11 @@ func (client *Client) Register() *RegistrationRequest {
 
 func (client *Client) AuthInit() *ClientAuthInitRequest {
 	G := crypto.GetG(client.Curve)
-	x1 := crypto.GenerateKey(client.CurveParams.N)
+	x1 := crypto.GenerateKey(client.Curve)
 	X1 := crypto.MultiplyG(client.Curve, x1)
 	PI1 := crypto.GenerateZKPGProvided(client.Curve, G, client.CurveParams.N, x1, X1, client.UserIdentifier)
 
-	x2 := crypto.GenerateKey(client.CurveParams.N)
+	x2 := crypto.GenerateKey(client.Curve)
 	X2 := crypto.MultiplyG(client.Curve, x2)
 	PI2 := crypto.GenerateZKPGProvided(client.Curve, G, client.CurveParams.N, x2, X2, client.UserIdentifier)
 

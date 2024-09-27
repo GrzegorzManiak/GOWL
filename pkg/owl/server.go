@@ -35,7 +35,7 @@ func ServerInit(
 }
 
 func (server *Server) RegisterUser() *RegistrationResponse {
-	x3 := crypto.GenerateKey(server.CurveParams.N)
+	x3 := crypto.GenerateKey(server.Curve)
 	X3 := crypto.MultiplyG(server.Curve, x3)
 	PI3 := crypto.GenerateZKP(server.Curve, server.CurveParams.N, x3, X3, server.ServerName)
 
@@ -68,7 +68,7 @@ func (server *Server) AuthInit(
 		return nil, errors.New("user and Server cannot have the same name")
 	}
 
-	x4 := crypto.GenerateKey(server.CurveParams.N)
+	x4 := crypto.GenerateKey(server.Curve)
 	X4 := crypto.MultiplyG(curve, x4)
 	PI4 := crypto.GenerateZKP(curve, server.CurveParams.N, x4, X4, server.ServerName)
 	GBeta := crypto.AddPoints(curve, crypto.AddPoints(curve, clientInit.X1, clientInit.X2), serverRegistration.Payload.X3)
