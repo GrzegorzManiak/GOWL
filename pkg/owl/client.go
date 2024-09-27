@@ -101,18 +101,48 @@ func (client *Client) AuthValidate(
 		return nil, errors.New("ZKP Verification Failed for PI4")
 	}
 
-	GBeta := crypto.AddPoints(curve, crypto.AddPoints(curve, clientInit.Payload.X1, clientInit.Payload.X2), serverInit.X3)
+	X1X2, err := crypto.AddPoints(curve, clientInit.Payload.X1, clientInit.Payload.X2)
+	if err != nil {
+		return nil, err
+	}
+
+	GBeta, err := crypto.AddPoints(curve, X1X2, serverInit.X3)
+	if err != nil {
+		return nil, err
+	}
 	if !crypto.VerifyZKP(curve, GBeta, serverInit.Beta, *serverInit.PIBeta, client.ServerName) {
 		return nil, errors.New("ZKP Verification Failed for PIBeta")
 	}
 
-	Gα := crypto.AddPoints(curve, crypto.AddPoints(curve, clientInit.Payload.X1, serverInit.X3), serverInit.X4)
+	X1X3, err := crypto.AddPoints(curve, clientInit.Payload.X1, serverInit.X3)
+	if err != nil {
+		return nil, err
+	}
+
+	Gα, err := crypto.AddPoints(curve, X1X3, serverInit.X4)
+	if err != nil {
+		return nil, err
+	}
+
 	x2π := crypto.ModuloN(crypto.Multiply(clientInit.x2, client.PI), client.CurveParams.N)
-	α := crypto.MultiplyPoint(curve, &Gα, x2π)
+	α, err := crypto.MultiplyPoint(curve, &Gα, x2π)
+	if err != nil {
+		return nil, err
+	}
 	PIAlpha := crypto.GenerateZKPGProvided(curve, Gα, client.CurveParams.N, x2π, α, client.UserIdentifier)
 
-	rawClientKey := crypto.SubtractPoints(curve, serverInit.Beta, crypto.MultiplyPoint(curve, &serverInit.X4, x2π))
-	rawClientKey = crypto.MultiplyPoint(curve, &rawClientKey, clientInit.x2)
+	X4x2π, err := crypto.MultiplyPoint(curve, &serverInit.X4, x2π)
+	if err != nil {
+		return nil, err
+	}
+	rawClientKey, err := crypto.SubtractPoints(curve, serverInit.Beta, X4x2π)
+	if err != nil {
+		return nil, err
+	}
+	rawClientKey, err = crypto.MultiplyPoint(curve, &rawClientKey, clientInit.x2)
+	if err != nil {
+		return nil, err
+	}
 
 	clientSessionKey := crypto.Hash(rawClientKey, SessionKey)
 	clientKCKey := crypto.Hash(rawClientKey, ConfirmationKey)

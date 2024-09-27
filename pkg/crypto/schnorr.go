@@ -18,7 +18,7 @@ func GenerateZKP(
 	userID string,
 ) *SchnorrZKP {
 	g := GetG(generator)
-	return GenerateZKPGProvided(generator, g, n, x, X, userID) // No need for &g
+	return GenerateZKPGProvided(generator, g, n, x, X, userID)
 }
 
 func GenerateZKPGProvided(
@@ -30,7 +30,10 @@ func GenerateZKPGProvided(
 	prover string,
 ) *SchnorrZKP {
 	v := GenerateKey(curve)
-	V := MultiplyPoint(curve, &g, v)
+	V, err := MultiplyPoint(curve, &g, v)
+	if err != nil {
+		panic(err)
+	}
 	h := Hash(g, V, X, prover)
 	r := Multiply(x, h)
 	r = new(big.Int).Sub(v, r)
@@ -68,12 +71,29 @@ func VerifyZKP(
 		return false
 	}
 
-	xXh := MultiplyPoint(curve, &X, CalculateCofactor(curve))
+	xXh, err := MultiplyPoint(curve, &X, CalculateCofactor(curve))
+	if err != nil {
+		return false
+	}
 	xXhX, xXhY := elliptic.UnmarshalCompressed(curve, xXh)
 	if IsInfinity(xXhX, xXhY) {
 		return false
 	}
 
-	gRxhmn := AddPoints(curve, MultiplyPoint(curve, &generator, zkp.R), MultiplyPoint(curve, &X, ModuloN(h, curve.Params().N)))
+	gr, err := MultiplyPoint(curve, &generator, zkp.R)
+	if err != nil {
+		return false
+	}
+
+	Xhn, err := MultiplyPoint(curve, &X, ModuloN(h, curve.Params().N))
+	if err != nil {
+		return false
+	}
+
+	gRxhmn, err := AddPoints(curve, gr, Xhn)
+	if err != nil {
+		return false
+	}
+
 	return PointsEqual(curve, zkp.V, gRxhmn)
 }

@@ -2,6 +2,7 @@ package crypto
 
 import (
 	"crypto/elliptic"
+	"errors"
 	"math/big"
 )
 
@@ -16,28 +17,37 @@ func MultiplyG(curve elliptic.Curve, x *big.Int) []byte {
 	return elliptic.MarshalCompressed(curve, tx, ty)
 }
 
-func MultiplyPoint(curve elliptic.Curve, X *[]byte, x *big.Int) []byte {
+func MultiplyPoint(curve elliptic.Curve, X *[]byte, x *big.Int) ([]byte, error) {
 	x1x, x1y := elliptic.UnmarshalCompressed(curve, *X)
+	if x1x == nil || x1y == nil {
+		return nil, errors.New("Point is invalid")
+	}
 	tx, ty := curve.ScalarMult(x1x, x1y, x.Bytes())
-	return elliptic.MarshalCompressed(curve, tx, ty)
+	return elliptic.MarshalCompressed(curve, tx, ty), nil
 }
 
-func AddPoints(curve elliptic.Curve, x1 []byte, x2 []byte) []byte {
+func AddPoints(curve elliptic.Curve, x1 []byte, x2 []byte) ([]byte, error) {
 	x1x, x1y := elliptic.UnmarshalCompressed(curve, x1)
 	x2x, x2y := elliptic.UnmarshalCompressed(curve, x2)
+	if x1x == nil || x1y == nil || x2x == nil || x2y == nil {
+		return nil, errors.New("one or more points are invalid")
+	}
 	tx, ty := curve.Add(x1x, x1y, x2x, x2y)
-	return elliptic.MarshalCompressed(curve, tx, ty)
+	return elliptic.MarshalCompressed(curve, tx, ty), nil
 }
 
-func SubtractPoints(curve elliptic.Curve, x1 []byte, x2 []byte) []byte {
+func SubtractPoints(curve elliptic.Curve, x1 []byte, x2 []byte) ([]byte, error) {
 	x1x, x1y := elliptic.UnmarshalCompressed(curve, x1)
 	x2x, x2y := elliptic.UnmarshalCompressed(curve, x2)
+	if x1x == nil || x1y == nil || x2x == nil || x2y == nil {
+		return nil, errors.New("one or more points are invalid")
+	}
 	negY2 := new(big.Int).Neg(x2y)
 	if negY2.Sign() < 0 {
 		negY2.Add(negY2, curve.Params().P)
 	}
 	tx, ty := curve.Add(x1x, x1y, x2x, negY2)
-	return elliptic.MarshalCompressed(curve, tx, ty)
+	return elliptic.MarshalCompressed(curve, tx, ty), nil
 }
 
 func PointsEqual(curve elliptic.Curve, x1 []byte, x2 []byte) bool {

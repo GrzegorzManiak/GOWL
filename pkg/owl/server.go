@@ -71,9 +71,19 @@ func (server *Server) AuthInit(
 	x4 := crypto.GenerateKey(server.Curve)
 	X4 := crypto.MultiplyG(curve, x4)
 	PI4 := crypto.GenerateZKP(curve, server.CurveParams.N, x4, X4, server.ServerName)
-	GBeta := crypto.AddPoints(curve, crypto.AddPoints(curve, clientInit.X1, clientInit.X2), serverRegistration.Payload.X3)
+	X1X2, err := crypto.AddPoints(curve, clientInit.X1, clientInit.X2)
+	if err != nil {
+		return nil, err
+	}
+	GBeta, err := crypto.AddPoints(curve, X1X2, serverRegistration.Payload.X3)
+	if err != nil {
+		return nil, err
+	}
 	x4Pi := crypto.ModuloN(crypto.Multiply(x4, server.UserRegistration.PI), server.CurveParams.N)
-	β := crypto.MultiplyPoint(curve, &GBeta, x4Pi)
+	β, err := crypto.MultiplyPoint(curve, &GBeta, x4Pi)
+	if err != nil {
+		return nil, err
+	}
 	PIBeta := crypto.GenerateZKPGProvided(curve, GBeta, server.CurveParams.N, x4Pi, β, server.ServerName)
 
 	payload := &ServerAuthInitResponsePayload{
@@ -98,18 +108,33 @@ func (server *Server) AuthValidate(
 	serverInit *ServerAuthInitResponse,
 ) (*ServerAuthValidateResponse, error) {
 	curve := server.Curve
-	Gα := crypto.AddPoints(curve, clientInit.X1, serverInit.Payload.X3)
-	Gα = crypto.AddPoints(curve, Gα, serverInit.Payload.X4)
+	Gα, err := crypto.AddPoints(curve, clientInit.X1, serverInit.Payload.X3)
+	if err != nil {
+		return nil, err
+	}
+	Gα, err = crypto.AddPoints(curve, Gα, serverInit.Payload.X4)
+	if err != nil {
+		return nil, err
+	}
 
 	if crypto.VerifyZKP(curve, Gα, clientValidate.Alpha, *clientValidate.PIAlpha, server.UserIdentifier) == false {
 		return nil, errors.New("ZKP Verification Failed for PIAlpha")
 	}
 
 	x4π := crypto.Multiply(serverInit.Xx4, server.UserRegistration.PI)
-	X2x4π := crypto.MultiplyPoint(curve, &clientInit.X2, crypto.ModuloN(x4π, server.CurveParams.N))
+	X2x4π, err := crypto.MultiplyPoint(curve, &clientInit.X2, crypto.ModuloN(x4π, server.CurveParams.N))
+	if err != nil {
+		return nil, err
+	}
 
-	rawServerKey := crypto.SubtractPoints(server.Curve, clientValidate.Alpha, X2x4π)
-	rawServerKey = crypto.MultiplyPoint(server.Curve, &rawServerKey, serverInit.Xx4)
+	rawServerKey, err := crypto.SubtractPoints(server.Curve, clientValidate.Alpha, X2x4π)
+	if err != nil {
+		return nil, err
+	}
+	rawServerKey, err = crypto.MultiplyPoint(server.Curve, &rawServerKey, serverInit.Xx4)
+	if err != nil {
+		return nil, err
+	}
 	serverSessionKey := crypto.Hash(rawServerKey, SessionKey)
 	serverKCKey := crypto.Hash(rawServerKey, ConfirmationKey)
 
@@ -150,10 +175,19 @@ func (server *Server) AuthValidate(
 	)
 
 	G := crypto.GetG(curve)
-	GxRv := crypto.MultiplyPoint(curve, &G, clientValidate.R)
+	GxRv, err := crypto.MultiplyPoint(curve, &G, clientValidate.R)
+	if err != nil {
+		return nil, err
+	}
 	hServerModN := crypto.ModuloN(hServer, server.CurveParams.N)
-	TxH := crypto.MultiplyPoint(curve, &server.UserRegistration.T, hServerModN)
-	X1x := crypto.AddPoints(curve, GxRv, TxH)
+	TxH, err := crypto.MultiplyPoint(curve, &server.UserRegistration.T, hServerModN)
+	if err != nil {
+		return nil, err
+	}
+	X1x, err := crypto.AddPoints(curve, GxRv, TxH)
+	if err != nil {
+		return nil, err
+	}
 
 	if !crypto.PointsEqual(curve, clientInit.X1, X1x) {
 		return nil, errors.New("client authentication failed, X1 mismatch")
