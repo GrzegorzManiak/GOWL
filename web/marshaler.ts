@@ -16,22 +16,32 @@ function EncodeToBase64(data: Uint8Array | BigInt): string {
     if (data instanceof BigInt || typeof data == 'bigint') bytes = BigIntToByteArray(data);
     else if (data instanceof Uint8Array) bytes = data;
     else throw new Error('Invalid type passed to encodeToBase64');
-    return btoa(String.fromCharCode(...bytes));
+    return UrlSafeBase64Encode(bytes);
 }
 
 function BigIntFromBase64(base64: string): bigint {
-    const bytes = new Uint8Array(atob(base64).split('').map(c => c.charCodeAt(0)));
-    return bytesToNumberBE(bytes);
+    return bytesToNumberBE(UrlSafeBase64Decode(base64));
 }
 
 function PointFromBase64(curve: SupportedCurves, base64: string): ProjPointType<bigint> {
-    const bytes = new Uint8Array(atob(base64).split('').map(c => c.charCodeAt(0)));
-    return GetCurve(curve).ProjectivePoint.fromHex(bytesToHex(bytes));
+    return GetCurve(curve).ProjectivePoint.fromHex(bytesToHex(UrlSafeBase64Decode(base64)));
+}
+
+function UrlSafeBase64Encode(data: Uint8Array | bigint): string {
+    if (typeof data === 'bigint') data = BigIntToByteArray(data);
+    return EncodeToBase64(data).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+}
+
+function UrlSafeBase64Decode(data: string): Uint8Array {
+    return new Uint8Array(Buffer.from(data.replace(/-/g, '+').replace(/_/g, '/'), 'base64'));
 }
 
 export {
     BigIntToByteArray,
     EncodeToBase64,
     BigIntFromBase64,
-    PointFromBase64
+    PointFromBase64,
+
+    UrlSafeBase64Encode,
+    UrlSafeBase64Decode
 }
