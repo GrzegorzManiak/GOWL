@@ -1,4 +1,4 @@
-import { BigIntToByteArray } from './marshaler';
+import { BigIntToByteArray } from './encoding';
 import { BytesToBigInt } from './ops';
 import { concatBytes } from '@noble/curves/abstract/utils';
 

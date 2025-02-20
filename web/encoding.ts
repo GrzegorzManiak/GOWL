@@ -29,7 +29,8 @@ function PointFromBase64(curve: SupportedCurves, base64: string): ProjPointType<
 
 function UrlSafeBase64Encode(data: Uint8Array | bigint): string {
     if (typeof data === 'bigint') data = BigIntToByteArray(data);
-    return EncodeToBase64(data).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+    const base64 = Buffer.from(data).toString('base64');
+    return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
 }
 
 function UrlSafeBase64Decode(data: string): Uint8Array {

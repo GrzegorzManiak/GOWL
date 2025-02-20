@@ -1,6 +1,6 @@
 import { bytesToNumberBE, concatBytes } from '@noble/curves/abstract/utils';
 import { SchnorrZKP, SupportedCurves } from './types';
-import { BigIntToByteArray } from './marshaler';
+import { BigIntToByteArray } from './encoding';
 import { GetCurve } from './ecc_ops';
 
 function ModuloN(x: bigint, n: bigint) {

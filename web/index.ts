@@ -6,4 +6,4 @@ export * from './schnorr';
 export * from './hash';
 export * from './hmac';
 export * from './ecc_ops';
-export * from './marshaler';
+export * from './encoding';

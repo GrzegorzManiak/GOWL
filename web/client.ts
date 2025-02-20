@@ -2,7 +2,7 @@ import { ClientAuthInit, ClientAuthInitPrivate, ClientAuthVerify, ClientAuthVeri
 import { GetCurve, GetG } from './ecc_ops';
 import { Hash } from './hash';
 import { HMac } from './hmac';
-import { BigIntFromBase64, EncodeToBase64, PointFromBase64 } from './marshaler';
+import { BigIntFromBase64, EncodeToBase64, PointFromBase64 } from './encoding';
 import { CompareTo, GenerateKey, ModuloN } from './ops';
 import { GenerateZKPGProvided, VerifyZKP } from './schnorr';
 import { Keys, KeyTags, SupportedCurves } from './types';
